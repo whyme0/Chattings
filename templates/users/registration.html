@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block page_head %}
+    <link rel="stylesheet" href="{% static 'users/registration_view/registration.css' %}">
+{% endblock page_head %}
+
+
+
+{% block page_title %}
+    Registration
+{% endblock page_title %}
+
+
+
+
+{% block content %}
+    <h1 class="row justify-content-center m-3">Create an account</h1>
+    <div class="row justify-content-center px-2">
+        <form action="" method="POST">{% csrf_token %}
+            {% for field in form %}
+            
+            <div class="field_wrapper">
+                {{ field.label_tag }} <br> {{ field }}
+                
+                {% if field.help_text %}
+                    <p class="help text-black-50 mb-0">{{field.help_text|safe}}</p>
+                {% endif %}
+                
+                {% for error in field.errors %}
+                    <p class="text-danger field_error {{field.name}}-error m-0 p-0">{{ error }}</p>
+                {% endfor %}
+                
+                <br>
+            </div>
+            
+            {% endfor %}
+            
+            <input value="Create" type="submit" disabled>
+        </form>
+    </div>
+{% endblock content %}
+
+
+
+
+{% block page_scripts %}
+    <script src="{% static 'users/registration_view/registration.js' %}" type="module"></script>
+{% endblock page_scripts %}

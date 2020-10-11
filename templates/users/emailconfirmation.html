@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+
+
+{% block page_title %}
+    Email confirmation
+{% endblock page_title %}
+
+
+
+{% block content %}
+    <br>
+    {% for message in messages %}
+        
+    
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR%}
+            <p class="text-danger {{message.extra_tags}}">{{message}}</p>
+        
+        {% elif 'email-confirmed' in message.extra_tags %}
+            <p class="text-success {{message.extra_tags}}">{{message}}</p>
+            <a href="{% url 'users:login' %}" class="login-link">Login now.</a>
+        {% endif %}
+    
+    
+    {% endfor %}
+{% endblock content %}

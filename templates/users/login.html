@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block page_head %}
+    <link rel="stylesheet" href="{% static 'users/login_view/login.css' %}">
+{% endblock page_head %}
+
+{% block page_title %}
+    Login
+{% endblock page_title %}
+
+
+
+
+{% block content %}
+    <h1 class="row justify-content-center m-3">Login to Chattings</h1>
+    <div class="row justify-content-center">
+        {% for message in messages %}
+            {% if 'email-not-confirmed' in message.extra_tags %}
+                <p class="text-danger m-0 {{message.extra_tags}}">{{message}}</p><br>
+                <p class="text-warning"><a href="{{resend_email}}" class="resend-email-link">Click here to resend email confirmation letter</a></p>
+            {% elif 'success-registration' in message.extra_tags %}
+                <p class="text-success {{message.extra_tags}}">{{message}}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="row justify-content-center">
+        <form action="" method="POST">{% csrf_token %}
+            {% for err in form.non_field_errors %}
+                <p class="text-danger m-0 p-0 text-center non-field-error">{{ err }}</p>
+            {% endfor %}
+            <br>
+            
+            {% for field in form %}
+                <div class="field_wrapper">
+                    {{ field.label_tag }} <br> {{ field }}
+                    
+                    {% if field.help_text %}
+                        <p class="help">{{field.help_text|safe}}</p>
+                    {% endif %}
+
+                    {% for err in field.errors %}
+                        <p class="text-danger field_error {{field.name}}-error m-0 p-0">{{ err }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            
+            <a href="{% url 'users:registration' %}" class="d-block">Create new account</a>
+            <input value="Sign in" type="submit" disabled>
+        </form>
+    </div>
+{% endblock content %}
+
+
+{% block page_scripts %}
+    <script src="{% static 'users/login_view/login.js' %}" type="module"></script>
+{% endblock page_scripts %}
