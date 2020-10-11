@@ -1,2 +1,8 @@
 # Enviroment file with private data
 /settings/.env
+
+# Some not which not belong to the project
+/.vscode/
+
+# Some trach such as cache
+*.pyc
