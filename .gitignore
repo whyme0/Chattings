@@ -7,3 +7,4 @@
 # Some trach such as cache
 /__pycache__/
 *.pyc
+*.cpython-38.pyc
