@@ -3,7 +3,10 @@ from rest_framework import serializers
 from apps.users.models import Profile
 
 
-class UserSerializer(serializers.ModelSerializer):
+class ProfileSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Profile
-        fields = ['id', 'username', 'avatar_image', 'date_joined']
+        fields = ['url', 'id', 'username', 'avatar_image', 'date_joined']
+        extra_kwargs = {
+            'url': {'view_name': 'users:profile', 'lookup_field': 'username'}
+        }
