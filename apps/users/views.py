@@ -1,4 +1,5 @@
-from django.views.generic import FormView, TemplateView, RedirectView
+from django.views.generic import (FormView, TemplateView, RedirectView,
+    DetailView)
 from django.contrib.auth import login, authenticate
 from django.contrib.messages import error, success
 from django.contrib.auth.models import Permission
@@ -99,3 +100,7 @@ class ResendEmailConfirmation(RedirectView):
     
     def get_redirect_url(self, *args, **kwargs):
         return self.request.GET.get('redirect_to')
+
+
+class ProfileView(DetailView):
+    pass
