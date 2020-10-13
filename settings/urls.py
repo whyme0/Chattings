@@ -23,5 +23,6 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('images/favicon.ico'))),
-    path('', include('apps.users.urls'))
+    path('', include('apps.users.urls')),
+    path('api/', include('api.api_urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
