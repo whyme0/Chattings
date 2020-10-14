@@ -3,8 +3,11 @@
 
 # Some not which not belong to the project
 /.vscode/
+/media/user_avatars/**
+!/media/user_avatars/default_user_avatar.png
+*.png
 
-# Some trach such as cache
-/__pycache__/
+# Some trash such as cache
+**/__pycache__/
 *.pyc
 *.cpython-38.pyc
