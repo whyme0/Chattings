@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from django.core import mail
 
 
-from ..models import Profile, EmailVerification
+from ..models import Profile, Token
 from .. import views
 
 
@@ -161,7 +161,7 @@ class TestRegistrationView(TestCase):
 
         # And after registration, the user is created
         created_user = Profile.objects.get(username='temp2')
-        token = created_user.verification.token
+        token = created_user.token.token
 
         # Make sure that client see success message
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -257,7 +257,7 @@ class TestEmailConfirmationView(TestCase):
         The verification algorithm is as follows:
         1. check that the user cannot log in without a verified mail
         2. verify email address with get method in view
-        3. make sure that the user can log in, and the EmailVerification
+        3. make sure that the user can log in, and the Token
            model for the associated user is removed
         """
         # PART 1
@@ -270,7 +270,7 @@ class TestEmailConfirmationView(TestCase):
 
         # PART 2
         response = self.client.get(reverse('users:email_confirmation', kwargs={
-            'token': self.test_user.verification.token,
+            'token': self.test_user.token.token,
         }))
 
         self.assertIn(self.can_login_perm, self.test_user.user_permissions.all())
@@ -293,7 +293,7 @@ class TestEmailConfirmationView(TestCase):
 
     def test_errors(self):
         """
-        Check that django dipslay error in html template
+        Check that django display error in html template
         for client properly
         """
         response = self.client.get(reverse('users:email_confirmation', kwargs={
@@ -337,13 +337,13 @@ class TestResendEmailConfirmation(TestCase):
 
     def test_view_logic(self):
         """
-        Check that ResendEmailVerification truly
+        Check that ResendToken truly
         resened email verification
         """
         # data to compare:
-        token = self.temp_user1.verification.token
-        creation_date = self.temp_user1.verification.creation_date
-        expiration_date = self.temp_user1.verification.expiration_date
+        token = self.temp_user1.token.token
+        creation_date = self.temp_user1.token.creation_date
+        expiration_date = self.temp_user1.token.expiration_date
         response = self.client.get(
             reverse(
                 'users:resend_confirmation_email',
@@ -355,15 +355,15 @@ class TestResendEmailConfirmation(TestCase):
             follow=True
         )
         self.temp_user1.refresh_from_db()
-        self.assertEqual(response.resolver_match.view_name, 'users:login')
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(token, self.temp_user1.verification.token)
+        self.assertEqual(response.resolver_match.view_name, 'users:login')
+        self.assertNotEqual(token, self.temp_user1.token.token)
         self.assertNotEqual(
             creation_date,
-            self.temp_user1.verification.creation_date
+            self.temp_user1.token.creation_date
         )
         self.assertNotEqual(
             expiration_date,
-            self.temp_user1.verification.expiration_date
+            self.temp_user1.token.expiration_date
         )
         

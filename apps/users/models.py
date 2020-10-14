@@ -38,14 +38,14 @@ class Profile(AbstractUser):
     def save(self, **kwargs):
         super().save(**kwargs)
 
-        if not EmailVerification.objects.filter(profile=self):
-            EmailVerification(profile=self).save()
+        if not Token.objects.filter(profile=self):
+            Token(profile=self).save()
 
     def __str__(self):
         return self.email
 
 
-class EmailVerification(models.Model):
+class Token(models.Model):
     """
     Model with data to help recover passowrd, registrate user, etc.
     by email.
@@ -59,7 +59,7 @@ class EmailVerification(models.Model):
     profile = models.OneToOneField(
         Profile,
         on_delete=models.CASCADE,
-        related_name='verification',
+        related_name='token',
     )
 
     token = models.SlugField(

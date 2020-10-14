@@ -48,7 +48,7 @@ def generate_confirmation_html_email(token) -> str:
 def perform_email_verification(user, request:Optional=None,
     update_verification=False):
     """
-    Creates EmailVerification model and send email verification letter
+    Creates Token model and send email verification letter
 
      Args:
        user - instance of user model which email need to be
@@ -59,9 +59,9 @@ def perform_email_verification(user, request:Optional=None,
        
        request - optional parameter which need to send messages
     """
-    if update_verification: user.verification.refresh()
+    if update_verification: user.token.refresh()
     
-    html_message = generate_confirmation_html_email(user.verification.token)
+    html_message = generate_confirmation_html_email(user.token.token)
     plain_message = strip_tags(html_message)
     
     send_mail(
@@ -79,14 +79,14 @@ def perform_email_verification(user, request:Optional=None,
 
 def confirm_email(token, request):
     """
-    Seeks out EmailVerification model with specific token and
+    Seeks out Token model with specific token and
     confirm email address of user which related for such
-    EmailVerification model.
+    Token model.
     """
-    from .models import EmailVerification # due to a circular import
+    from .models import Token # due to a circular import
     can_login_permission = Permission.objects.get(codename='can_login')
     try:
-        verification = EmailVerification.objects.get(token=token)
+        verification = Token.objects.get(token=token)
         # validation here
         if timezone.now() < verification.expiration_date:
             verification.profile.user_permissions.add(can_login_permission)
@@ -95,7 +95,7 @@ def confirm_email(token, request):
             verification.delete()
         else:
             error(request, 'Token expired.', 'token-expired')
-    except EmailVerification.DoesNotExist:
+    except Token.DoesNotExist:
         error(request, 'Invalid token. Make sure your'
             ' token is valid and not deleted.', 'invalid-token')
 
