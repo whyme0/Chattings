@@ -13,6 +13,42 @@ def user_directory_upload(instance, filename):
     return 'user_avatars/{0}'.format(instance.username)
 
 
+class Token(models.Model):
+    """
+    Model with data to help recover passowrd, registrate user, etc.
+    by email using unique token.
+
+     Attrs:
+       token - token which determine
+       creation_date - date when model was created
+       expiration_date - date when the token will cease to be valid
+    """
+
+    token = models.SlugField(
+        unique=True,
+        max_length=140,
+        blank=True,
+    )
+
+    creation_date = models.DateTimeField()
+    expiration_date = models.DateTimeField()
+    
+    def save(self, **kwargs):
+        self.token = generate_token(140)
+        self.creation_date = timezone.now()
+        self.expiration_date = timezone.now() + timedelta(hours=1)
+        return super().save(**kwargs)
+
+    def refresh(self):
+        """
+        Refresh data in model such as token, creation_date, expiration_date
+        """
+        self.save()
+
+    def __str__(self):
+        return f'{self.profile.email}: {self.creation_date}'
+
+
 class Profile(AbstractUser):
     avatar_image = models.ImageField(
         upload_to=user_directory_upload,
@@ -38,6 +74,7 @@ class Profile(AbstractUser):
     def save(self, **kwargs):
         super().save(**kwargs)
 
+        # When profile creates in first time
         if not Token.objects.filter(profile=self):
             Token(profile=self).save()
 
@@ -45,46 +82,29 @@ class Profile(AbstractUser):
         return self.email
 
 
-class Token(models.Model):
+class EmailVerification(Token):
     """
-    Model with data to help recover passowrd, registrate user, etc.
-    by email.
+    Model with data to help confirm user by email
 
      Attrs:
-       profile - profile which need something from email
-       token - token which determine
-       creation_date - date when model was created
-       expiration_date - date when the token will cease to be valid
+       profile - profile which need to be confirmed.
     """
     profile = models.OneToOneField(
         Profile,
         on_delete=models.CASCADE,
-        related_name='token',
+        related_name='email_verification',
     )
 
-    token = models.SlugField(
-        unique=True,
-        max_length=140,
-        blank=True,
+
+class PasswordRecovery(Token):
+    """
+    Model with data to help recover password by email.
+
+     Attrs:
+       profile - profile which need to recover password
+    """
+    profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name='password_recovery',
     )
-
-    # NOTE: I should remove auto_now_add and manually
-    #       add date in save() method but I won't to
-    #       make new migrations in database.
-    creation_date = models.DateTimeField()
-    expiration_date = models.DateTimeField()
-    
-    def save(self, **kwargs):
-        self.token = generate_token(140)
-        self.creation_date = timezone.now()
-        self.expiration_date = timezone.now() + timedelta(hours=1)
-        return super().save(**kwargs)
-
-    def refresh(self):
-        """
-        Refresh data in model such as token, creation_date, expiration_date
-        """
-        self.save()
-
-    def __str__(self):
-        return f'{self.profile.email}: {self.creation_date}'
