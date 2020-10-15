@@ -4,7 +4,7 @@ from django.contrib.auth.models import Permission
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
-from ..models import Profile
+from ..models import Profile, PasswordRecovery, Token
 
 
 class TestProfileModel(TestCase):
@@ -89,3 +89,42 @@ class TestProfileModel(TestCase):
         self.assertNotIn(self.can_login_perm, self.u.user_permissions.all())
         self.u.user_permissions.add(self.can_login_perm)
         self.assertIn(self.can_login_perm, self.u.user_permissions.all())
+
+
+class TestPasswordRecoveryModel(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u = Profile.objects.create_user(
+            username='username',
+            email="email@m.c",
+            password='hardpwd123',
+        )
+    
+    def test_model_propertues(self):
+        """
+        Check that model successfully creates and
+        check it properties
+        """
+        pwd_recovery = PasswordRecovery.objects.create(profile=self.u)
+
+
+class TestTokenModel(TestCase):
+    def test_model_properties(self):
+        """
+        Check that model successfully creates and
+        check it properties
+        """
+        t = Token.objects.create()
+
+        self.assertEqual(len(t.token), 140)
+        self.assertLess(t.creation_date, t.expiration_date)
+
+        old_token = t.token
+        old_creation_date = t.creation_date
+        old_expiration_date = t.expiration_date
+
+        t.refresh()
+
+        self.assertNotEqual(old_token, t.token)
+        self.assertNotEqual(old_creation_date, t.creation_date)
+        self.assertNotEqual(old_expiration_date, t.expiration_date)
