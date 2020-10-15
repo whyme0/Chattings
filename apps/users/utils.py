@@ -59,9 +59,9 @@ def perform_email_verification(user, request:Optional=None,
        
        request - optional parameter which need to send messages
     """
-    if update_verification: user.token.refresh()
+    if update_verification: user.email_verification.refresh()
     
-    html_message = generate_confirmation_html_email(user.token.token)
+    html_message = generate_confirmation_html_email(user.email_verification.token)
     plain_message = strip_tags(html_message)
     
     send_mail(

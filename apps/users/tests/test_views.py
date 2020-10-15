@@ -161,7 +161,7 @@ class TestRegistrationView(TestCase):
 
         # And after registration, the user is created
         created_user = Profile.objects.get(username='temp2')
-        token = created_user.token.token
+        token = created_user.email_verification.token
 
         # Make sure that client see success message
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -270,7 +270,7 @@ class TestEmailConfirmationView(TestCase):
 
         # PART 2
         response = self.client.get(reverse('users:email_confirmation', kwargs={
-            'token': self.test_user.token.token,
+            'token': self.test_user.email_verification.token,
         }))
 
         self.assertIn(self.can_login_perm, self.test_user.user_permissions.all())
@@ -341,9 +341,9 @@ class TestResendEmailConfirmation(TestCase):
         resened email verification
         """
         # data to compare:
-        token = self.temp_user1.token.token
-        creation_date = self.temp_user1.token.creation_date
-        expiration_date = self.temp_user1.token.expiration_date
+        token = self.temp_user1.email_verification.token
+        creation_date = self.temp_user1.email_verification.creation_date
+        expiration_date = self.temp_user1.email_verification.expiration_date
         response = self.client.get(
             reverse(
                 'users:resend_confirmation_email',
@@ -357,13 +357,13 @@ class TestResendEmailConfirmation(TestCase):
         self.temp_user1.refresh_from_db()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.resolver_match.view_name, 'users:login')
-        self.assertNotEqual(token, self.temp_user1.token.token)
+        self.assertNotEqual(token, self.temp_user1.email_verification.token)
         self.assertNotEqual(
             creation_date,
-            self.temp_user1.token.creation_date
+            self.temp_user1.email_verification.creation_date
         )
         self.assertNotEqual(
             expiration_date,
-            self.temp_user1.token.expiration_date
+            self.temp_user1.email_verification.expiration_date
         )
         

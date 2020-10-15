@@ -76,7 +76,7 @@ class TestProfileModel(TestCase):
         # ev - email verification
         self.assertTrue(hasattr(self.u, 'email_verification'))
         
-        ev = self.u.token
+        ev = self.u.email_verification
         token = ev.token
 
         self.assertEqual(len(token), 140)
