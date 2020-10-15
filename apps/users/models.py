@@ -75,8 +75,8 @@ class Profile(AbstractUser):
         super().save(**kwargs)
 
         # When profile creates in first time
-        if not Token.objects.filter(profile=self):
-            Token(profile=self).save()
+        if not EmailVerification.objects.filter(profile=self):
+            EmailVerification(profile=self).save()
 
     def __str__(self):
         return self.email
