@@ -6,6 +6,7 @@
 /media/user_avatars/**
 !/media/user_avatars/default_user_avatar.png
 *.png
+**/migrations/
 
 # Some trash such as cache
 **/__pycache__/
