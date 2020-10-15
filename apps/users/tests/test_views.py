@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from django.core import mail
 
 
-from ..models import Profile, Token
+from ..models import Profile, EmailVerification
 from .. import views
 
 
@@ -243,7 +243,7 @@ class TestEmailConfirmationView(TestCase):
         """
         random_token = 'abcd453'
         response = self.client.get(reverse('users:email_confirmation', kwargs={
-            'token': 'randomToken5356',
+            'token': 'randomEmailVerification5356',
         }))
         
         self.assertEqual(response.status_code, 200)
@@ -257,7 +257,7 @@ class TestEmailConfirmationView(TestCase):
         The verification algorithm is as follows:
         1. check that the user cannot log in without a verified mail
         2. verify email address with get method in view
-        3. make sure that the user can log in, and the Token
+        3. make sure that the user can log in, and the EmailVerification
            model for the associated user is removed
         """
         # PART 1
@@ -297,7 +297,7 @@ class TestEmailConfirmationView(TestCase):
         for client properly
         """
         response = self.client.get(reverse('users:email_confirmation', kwargs={
-            'token': 'invalidToken31231323',
+            'token': 'invalidEmailVerification31231323',
         }))
 
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -337,7 +337,7 @@ class TestResendEmailConfirmation(TestCase):
 
     def test_view_logic(self):
         """
-        Check that ResendToken truly
+        Check that ResendEmailVerification truly
         resened email verification
         """
         # data to compare:

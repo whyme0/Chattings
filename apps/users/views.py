@@ -16,7 +16,7 @@ from django.db.models import Q
 from .utils import (perform_email_verification, confirm_email,
     find_user_or_404, find_user)
 from .forms import UserLoginForm, UserRegistrationForm
-from .models import Profile, Token
+from .models import Profile, EmailVerification
 
 
 class UserLoginView(LoginView):
@@ -91,7 +91,7 @@ class ResendEmailConfirmation(RedirectView):
         user = find_user_or_404(request.GET.get('username'))
         
         # If email not confirmed
-        if hasattr(user, 'token'):
+        if hasattr(user, 'email_verification'):
             perform_email_verification(user, request, update_verification=True)
         else:
             raise Http404('Page does not exist.')

@@ -70,11 +70,11 @@ class TestProfileModel(TestCase):
     
     def test_user_email_verification(self):
         """
-        Checks that Token model creates
+        Checks that EmailVerification model creates
         when create user model, and check it properties
         """
         # ev - email verification
-        self.assertTrue(hasattr(self.u, 'token'))
+        self.assertTrue(hasattr(self.u, 'email_verification'))
         
         ev = self.u.token
         token = ev.token

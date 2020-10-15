@@ -48,7 +48,7 @@ def generate_confirmation_html_email(token) -> str:
 def perform_email_verification(user, request:Optional=None,
     update_verification=False):
     """
-    Creates Token model and send email verification letter
+    Creates EmailVerification model and send email verification letter
 
      Args:
        user - instance of user model which email need to be
@@ -79,14 +79,14 @@ def perform_email_verification(user, request:Optional=None,
 
 def confirm_email(token, request):
     """
-    Seeks out Token model with specific token and
+    Seeks out EmailVerification model with specific token and
     confirm email address of user which related for such
-    Token model.
+    EmailVerification model.
     """
-    from .models import Token # due to a circular import
+    from .models import EmailVerification # due to a circular import
     can_login_permission = Permission.objects.get(codename='can_login')
     try:
-        verification = Token.objects.get(token=token)
+        verification = EmailVerification.objects.get(token=token)
         # validation here
         if timezone.now() < verification.expiration_date:
             verification.profile.user_permissions.add(can_login_permission)
@@ -94,8 +94,8 @@ def confirm_email(token, request):
                 ' now you can login.', 'email-confirmed')
             verification.delete()
         else:
-            error(request, 'Token expired.', 'token-expired')
-    except Token.DoesNotExist:
+            error(request, 'EmailVerification expired.', 'token-expired')
+    except EmailVerification.DoesNotExist:
         error(request, 'Invalid token. Make sure your'
             ' token is valid and not deleted.', 'invalid-token')
 
