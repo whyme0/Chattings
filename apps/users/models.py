@@ -46,7 +46,7 @@ class Token(models.Model):
         self.save()
 
     def __str__(self):
-        return f'{self.profile.email}: {self.creation_date}'
+        return f'Created at: {self.creation_date}'
 
 
 class Profile(AbstractUser):
@@ -95,6 +95,9 @@ class EmailVerification(Token):
         related_name='email_verification',
     )
 
+    def __str__(self):
+        return f'{self.profile.email}: {self.creation_date}'
+
 
 class PasswordRecovery(Token):
     """
@@ -108,3 +111,6 @@ class PasswordRecovery(Token):
         on_delete=models.CASCADE,
         related_name='password_recovery',
     )
+
+    def __str__(self):
+        return f'{self.profile.email}: {self.creation_date}'
