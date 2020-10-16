@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django import forms
 
 from .validators import username_exist_validator
+from .models import Profile
 
 
 class UserLoginForm(AuthenticationForm):
@@ -36,3 +37,7 @@ class UserRegistrationForm(UserCreationForm):
         model = get_user_model()
         fields = ('username', 'email')
         field_classes = {'username': UsernameField}
+
+
+class AskEmailForm(forms.Form):
+    email = forms.EmailField(validators=[username_exist_validator])
