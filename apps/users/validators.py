@@ -11,10 +11,10 @@ def username_exist_validator(val):
     try:
         get_user_model().objects.get(Q(username=val) | Q(email=val))
     except get_user_model().DoesNotExist:
+        msg = 'User with this username doesn\'t exist.'
         if '@' in val:
             msg = 'User with this email doesn\'t exist.'
-        else:
-            msg = 'User with this username doesn\'t exist.'
+        
         raise ValidationError(msg)
 
 
