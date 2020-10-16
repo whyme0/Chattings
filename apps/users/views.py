@@ -15,7 +15,7 @@ from django.db.models import Q
 
 from .utils import (perform_email_verification, confirm_email,
     find_user_or_404, find_user)
-from .forms import UserLoginForm, UserRegistrationForm
+from .forms import UserLoginForm, UserRegistrationForm, AskEmailForm
 from .models import Profile, EmailVerification
 
 
@@ -100,6 +100,15 @@ class ResendEmailConfirmation(RedirectView):
     
     def get_redirect_url(self, *args, **kwargs):
         return self.request.GET.get('redirect_to')
+
+
+class AskEmailForPasswordRecoveryView(FormView):
+    """
+    This view with form in template ask user for email
+    on which will be sent password recovery link.
+    """
+    form_class = AskEmailForm
+    template_name = 'users/ask_email_for_pwd_recovery.html'
 
 
 class ProfileView(DetailView):
