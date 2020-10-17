@@ -29,6 +29,12 @@ urlpatterns = [
         name='resend_confirmation_email',
     ),
 
+    path(
+        'auth/password-recovery/',
+        views.AskEmailForPasswordRecoveryView.as_view(),
+        name='perform_password_recovery',
+    ),
+
 
     # Part specially for user, user settings, user data, etc.
     path(
