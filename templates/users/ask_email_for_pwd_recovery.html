@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_head %}
+    <link rel="stylesheet" href="{% static 'users/ask_email_for_pwd_recovery/ask_email_for_pwd_recovery.css' %}">
+{% endblock page_head %}
+
+
+
+{% block page_title %}
+    Password Recovery
+{% endblock page_title %}
+
+
+
+{% block content %}
+    <h1 class="row justify-content-center m-3">Recover your password</h1>
+    <div class="row justify-content-center">
+        {% for message in messages %}
+            {% if 'pwd-recovery-mail-sent' in message.extra_tags %}
+                <p class="text-success {{message.extra_tags}}">{{message}}</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="row justify-content-center">
+        <form action="" method="POST">{% csrf_token %}
+            {% for err in form.non_field_errors %}
+                <p class="text-danger m-0 p-0 text-center non-field-error">{{ err }}</p>
+            {% endfor %}
+            <br>
+            
+            {% for field in form %}
+                <div class="field_wrapper">
+                    {{ field.label_tag }} <br> {{ field }}
+                    
+                    {% if field.help_text %}
+                        <p class="help">{{field.help_text|safe}}</p>
+                    {% endif %}
+
+                    <p class="text-danger field_error {{field.name}}-error m-0 p-0">{{ field.errors|first }}</p>
+                </div>
+            {% endfor %}
+
+            <input value="Recover password" type="submit" disabled>
+        </form>
+    </div>
+{% endblock content %}
+
+
+
+{% block page_scripts %}
+    <script src="{% static 'users/ask_email_for_pwd_recovery/ask_email_for_pwd_recovery.js' %}" type="module"></script>
+{% endblock page_scripts %}
