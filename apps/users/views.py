@@ -14,7 +14,7 @@ from django.db.models import Q
 
 
 from .utils import (perform_email_verification, confirm_email,
-    find_user_or_404, find_user)
+    find_user_or_404, find_user, perform_password_recovery)
 from .forms import UserLoginForm, UserRegistrationForm, AskEmailForm
 from .models import Profile, EmailVerification
 
@@ -109,6 +109,9 @@ class AskEmailForPasswordRecoveryView(FormView):
     """
     form_class = AskEmailForm
     template_name = 'users/ask_email_for_pwd_recovery.html'
+
+    def form_valid(self, form):
+        perform_password_recovery(form.cleaned_data['email'], self.request)
 
 
 class ProfileView(DetailView):
