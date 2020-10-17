@@ -80,6 +80,13 @@ class Profile(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+    def is_email_confirmed(self):
+        try:
+            self.email_verification
+            return False
+        except EmailVerification.DoesNotExist:
+            return True
 
 
 class EmailVerification(Token):
