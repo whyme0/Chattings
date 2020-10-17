@@ -14,6 +14,8 @@ from django.db.models import Q
 
 
 CHARS = '1234567890qwertyuiopasdfghjklzxcvbnm'
+
+
 def _random_upper(char: str) -> str:
     return char.upper() if randint(0, 1) else char
 
@@ -25,7 +27,7 @@ def generate_token(length: int) -> str:
     return output
 
 
-def generate_confirmation_html_email(token) -> str:
+def generate_confirmation_html_email(token: str) -> str:
     return '''
     <h1>Chattings: Email confirmation</h1>
 
@@ -39,6 +41,26 @@ def generate_confirmation_html_email(token) -> str:
     <p><a href="http://localhost:8000">chattings.com</a> | {1}</p>
     '''.format(
         reverse('users:email_confirmation', kwargs={
+            'token': token
+        }),
+        timezone.now().year
+    )
+
+
+def generate_password_recovery_html_email(token: str) -> str:
+    return '''
+    <h1>Chattings: Password Recovery</h1>
+
+    <p>You see this email because someone used your email
+    to recover password on <a href="http://localhost:8000">chattings.com</a>,
+    if it\'s not you just ignore this message.</p>
+
+    <p>Follow this link to continue password recovery:
+    <a href="http://localhost:8000{0}">recover password</a></p>
+
+    <p><a href="http://localhost:8000">chattings.com</a> | {1}</p>
+    '''.format(
+        reverse('users:recover_password', kwargs={
             'token': token
         }),
         timezone.now().year
@@ -77,7 +99,22 @@ def perform_email_verification(user, request:Optional=None,
             'success-registration')
 
 
-def confirm_email(token, request):
+def force_confirm_email(token: str):
+    """
+    Force email confirmation: using when we want to confirm email
+    without validation steps (for example like in confirm email).
+
+     Args:
+        token - token of EmailVerification model
+    """
+    from .models import EmailVerification
+    can_login_permission = Permission.objects.get(codename='can_login')
+    verification = EmailVerification.objects.get(token=token)
+    verification.profile.user_permissions.add(can_login_permission)
+    verification.delete()
+
+
+def confirm_email(token: str, request):
     """
     Seeks out EmailVerification model with specific token and
     confirm email address of user which related for such
