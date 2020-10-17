@@ -27,6 +27,37 @@ def generate_token(length: int) -> str:
     return output
 
 
+def find_user_or_404(query: str):
+    from .models import Profile
+    try:
+        return Profile.objects.get(
+            Q(username__iexact=query) | Q(email__iexact=query)
+        )
+    except Profile.DoesNotExist:
+        raise Http404('Page does not exist.')
+
+
+def find_user(query: str):
+    from .models import Profile
+    return Profile.objects.get(
+        Q(username__iexact=query) | Q(email__iexact=query)
+    )
+
+
+def prepare_password_recovery(user_query: str):
+    """
+    Create PasswordRecovery model for related user
+    and return user with created password recovery model
+    """
+    from .models import Profile, PasswordRecovery
+    user = find_user(user_query)
+    try:
+        user.password_recovery.refresh()
+    except PasswordRecovery.DoesNotExist:
+        PasswordRecovery.objects.create(profile=user)
+    return user
+
+
 def generate_confirmation_html_email(token: str) -> str:
     return '''
     <h1>Chattings: Email confirmation</h1>
@@ -99,6 +130,33 @@ def perform_email_verification(user, request:Optional=None,
             'success-registration')
 
 
+def perform_password_recovery(email, request:Optional=None):
+    """
+    Alogorithm of preparing password recovery:
+    1. Generate message which will be sent to user
+    2. Send current message
+    3. Tell to user in template about successfully
+       sending email.
+    """
+    user = prepare_password_recovery(email)
+
+    html_message = generate_password_recovery_html_email(
+        user.password_recovery.token)
+    plain_message = strip_tags(html_message)
+
+    send_mail(
+        subject='Chattings: Recover your password',
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        html_message=html_message)
+
+    if request:
+        success(request, ('Now check your email for'
+            ' password recovery message.'),
+            'pwd-recovery-mail-sent')
+
+
 def force_confirm_email(token: str):
     """
     Force email confirmation: using when we want to confirm email
@@ -135,20 +193,3 @@ def confirm_email(token: str, request):
     except EmailVerification.DoesNotExist:
         error(request, 'Invalid token. Make sure your'
             ' token is valid and not deleted.', 'invalid-token')
-
-
-def find_user_or_404(query: str):
-    from .models import Profile
-    try:
-        return Profile.objects.get(
-            Q(username__iexact=query) | Q(email__iexact=query)
-        )
-    except Profile.DoesNotExist:
-        raise Http404('Page does not exist.')
-
-
-def find_user(query: str):
-    from .models import Profile
-    return Profile.objects.get(
-        Q(username__iexact=query) | Q(email__iexact=query)
-    )
