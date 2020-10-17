@@ -40,4 +40,8 @@ class UserRegistrationForm(UserCreationForm):
 
 
 class AskEmailForm(forms.Form):
-    email = forms.EmailField(validators=[username_exist_validator])
+    email = forms.EmailField(
+        validators=[username_exist_validator],
+        help_text='We will sent password recovery letter on this email',
+        widget=forms.EmailInput(attrs={'class': 'field'})
+    )
