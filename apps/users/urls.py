@@ -35,6 +35,11 @@ urlpatterns = [
         name='perform_password_recovery',
     ),
 
+    path(
+        'auth/password-recovery/<slug:token>',
+        views.PasswordResetyView.as_view(),
+        name='recover_password',
+    )
 
     # Part specially for user, user settings, user data, etc.
     path(
