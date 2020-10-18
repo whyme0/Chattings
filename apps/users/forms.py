@@ -1,5 +1,5 @@
 from django.contrib.auth.forms import (AuthenticationForm, UserCreationForm,
-    UsernameField)
+    UsernameField, SetPasswordForm)
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django import forms
@@ -37,6 +37,16 @@ class UserRegistrationForm(UserCreationForm):
         model = get_user_model()
         fields = ('username', 'email')
         field_classes = {'username': UsernameField}
+
+
+class PasswordResetForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['password1'].widget.attrs['class'] = 'field'
+        self.fields['password1'].help_text = ''
+        self.fields['password2'].widget.attrs['class'] = 'field'
+        self.fields['password2'].help_text = ''
 
 
 class AskEmailForm(forms.Form):
