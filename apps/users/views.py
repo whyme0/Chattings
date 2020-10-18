@@ -115,7 +115,7 @@ class AskEmailForPasswordRecoveryView(FormView):
         perform_password_recovery(form.cleaned_data['email'], self.request)
 
 
-class PasswordRecoveryView(FormView):
+class PasswordResetyView(FormView):
     form_class = PasswordResetForm
     template_name = 'users/password_reset.html'
 
