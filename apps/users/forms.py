@@ -40,8 +40,8 @@ class UserRegistrationForm(UserCreationForm):
 
 
 class PasswordResetForm(SetPasswordForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
 
         self.fields['password1'].widget.attrs['class'] = 'field'
         self.fields['password1'].help_text = ''
