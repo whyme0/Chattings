@@ -114,6 +114,8 @@ class AskEmailForPasswordRecoveryView(FormView):
     def form_valid(self, form):
         perform_password_recovery(form.cleaned_data['email'], self.request)
 
+        return redirect('users:perform_password_recovery')
+
 
 class PasswordResetyView(FormView):
     form_class = PasswordResetForm
