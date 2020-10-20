@@ -367,3 +367,6 @@ class TestResendEmailConfirmation(TestCase):
             self.temp_user1.email_verification.expiration_date
         )
         
+
+def TestAskEmailPasswordRecoveryView(TestCase):
+    pass
