@@ -1,5 +1,6 @@
 from django.views.generic import (FormView, TemplateView, RedirectView,
     DetailView)
+from django.core.exceptions import SuspiciousOperation
 from django.contrib.auth import login, authenticate
 from django.contrib.messages import error, success
 from django.contrib.auth.models import Permission
@@ -14,10 +15,10 @@ from django.db.models import Q
 
 
 from .utils import (perform_email_verification, confirm_email,
-    find_user_or_404, find_user, perform_password_recovery)
+    find_user_or_404, find_user, perform_password_recovery, recover_password)
 from .forms import (UserLoginForm, UserRegistrationForm, AskEmailForm,
     PasswordResetForm)
-from .models import Profile, EmailVerification
+from .models import Profile, PasswordRecovery
 
 
 class UserLoginView(LoginView):
@@ -120,6 +121,27 @@ class AskEmailForPasswordRecoveryView(FormView):
 class PasswordResetyView(FormView):
     form_class = PasswordResetForm
     template_name = 'users/password_reset.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.get_from_token(self.kwargs['token']).profile
+        return kwargs
+
+    def get_from_token(self, token):
+        """Return PasswordRecovery model by token"""
+        self.pwd_recovery = None
+        try:
+            self.pwd_recovery = PasswordRecovery.objects.get(token=token)
+            if self.pwd_recovery.is_token_expired():
+                msg = 'Token expired.'
+        except PasswordRecovery.DoesNotExist:
+            msg = 'Token doesn\'t exist.'
+        if self.pwd_recovery:
+            return self.pwd_recovery
+        raise SuspiciousOperation(msg)
+
+    def form_valid(self, form):
+        recover_password(form, self.pwd_recovery)
 
 
 class ProfileView(DetailView):
