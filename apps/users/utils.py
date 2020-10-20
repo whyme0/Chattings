@@ -6,6 +6,7 @@ from django.contrib.messages import success, error
 from django.contrib.auth.models import Permission
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
+from django.contrib.auth import logout
 from django.utils import timezone
 from django.conf import settings
 from django.urls import reverse
@@ -30,9 +31,7 @@ def generate_token(length: int) -> str:
 def find_user_or_404(query: str):
     from .models import Profile
     try:
-        return Profile.objects.get(
-            Q(username__iexact=query) | Q(email__iexact=query)
-        )
+        return find_user(query)
     except Profile.DoesNotExist:
         raise Http404('Page does not exist.')
 
@@ -130,7 +129,7 @@ def perform_email_verification(user, request:Optional=None,
             'success-registration')
 
 
-def perform_password_recovery(email, request:Optional=None):
+def perform_password_recovery(email, request, alert:bool=True):
     """
     Alogorithm of preparing password recovery:
     1. Generate message which will be sent to user
@@ -138,6 +137,7 @@ def perform_password_recovery(email, request:Optional=None):
     3. Tell to user in template about successfully
        sending email.
     """
+    logout(request)
     user = prepare_password_recovery(email)
 
     html_message = generate_password_recovery_html_email(
@@ -151,7 +151,7 @@ def perform_password_recovery(email, request:Optional=None):
         recipient_list=[user.email],
         html_message=html_message)
 
-    if request:
+    if alert:
         success(request, ('Now check your email for'
             ' password recovery message.'),
             'pwd-recovery-mail-sent')
@@ -160,7 +160,7 @@ def perform_password_recovery(email, request:Optional=None):
 def force_confirm_email(token: str):
     """
     Force email confirmation: using when we want to confirm email
-    without validation steps (for example like in confirm email).
+    without validation steps (for example like in confirm_email function).
 
      Args:
         token - token of EmailVerification model
@@ -193,3 +193,21 @@ def confirm_email(token: str, request):
     except EmailVerification.DoesNotExist:
         error(request, 'Invalid token. Make sure your'
             ' token is valid and not deleted.', 'invalid-token')
+
+
+def recover_password(form, pwd_recovery_obj, request:Optional=None):
+    """
+    Algorithm:
+    1. If user's email not confirmed then confirm it;
+    2. Remove passed PasswordRecovery object;
+    3. Save user model with changed data;
+    """
+    # step 1
+    force_confirm_email(pwd_recovery_obj.profile.email_verification.token)
+    # step 2
+    pwd_recovery_obj.delete()
+    # step 3
+    form.save()
+
+    if request:
+        success('Password changed.')
