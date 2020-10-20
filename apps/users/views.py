@@ -118,7 +118,7 @@ class AskEmailForPasswordRecoveryView(FormView):
         return redirect('users:perform_password_recovery')
 
 
-class PasswordResetyView(FormView):
+class PasswordResetView(FormView):
     form_class = PasswordResetForm
     template_name = 'users/password_reset.html'
 
@@ -133,15 +133,15 @@ class PasswordResetyView(FormView):
         try:
             self.pwd_recovery = PasswordRecovery.objects.get(token=token)
             if self.pwd_recovery.is_token_expired():
-                msg = 'Token expired.'
+                raise SuspiciousOperation('Token expired.')
         except PasswordRecovery.DoesNotExist:
-            msg = 'Token doesn\'t exist.'
+            SuspiciousOperation('Token doesn\'t exist.')
         if self.pwd_recovery:
             return self.pwd_recovery
-        raise SuspiciousOperation(msg)
 
     def form_valid(self, form):
         recover_password(form, self.pwd_recovery)
+        return redirect('users:login')
 
 
 class ProfileView(DetailView):
