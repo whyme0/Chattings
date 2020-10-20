@@ -47,6 +47,9 @@ class Token(models.Model):
 
     def __str__(self):
         return f'Created at: {self.creation_date}'
+    
+    def is_token_expired(self):
+        return timezone.now() > self.expiration_date
 
 
 class Profile(AbstractUser):
