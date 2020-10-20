@@ -8,8 +8,9 @@ from bs4 import BeautifulSoup
 from django.core import mail
 
 
-from ..models import Profile, EmailVerification
+from ..models import Profile, EmailVerification, PasswordRecovery
 from .. import views
+from ..utils import force_confirm_email
 
 
 class TestLoginView(TestCase):
@@ -368,5 +369,98 @@ class TestResendEmailConfirmation(TestCase):
         )
         
 
-def TestAskEmailPasswordRecoveryView(TestCase):
-    pass
+class TestAskEmailPasswordRecoveryView(TestCase):
+    def setUp(self):
+        content_type = ContentType.objects.get_for_model(Profile)
+        can_login_perm = Permission.objects.create(
+            codename='can_login',
+            name='Can login to site',
+            content_type=content_type,
+        )
+        force_confirm_email(self.confirmed_u.email_verification.token)
+        
+    @classmethod
+    def setUpTestData(cls):
+        cls.confirmed_u = Profile.objects.create_user(
+            username='temp1',
+            email='temp1@mail.co',
+            password='hardpwd123',
+        )
+        
+        cls.notconfirmed_u = Profile.objects.create_user(
+            username='temp2',
+            email='temp2@mail.co',
+            password='hardpwd123',
+        )
+    
+    def test_basics(self):
+        """
+        Check basic properties such as
+        status_code, page title, view.
+        """
+        response = self.client.get(reverse('users:perform_password_recovery'))
+        title = BeautifulSoup(response.content, 'html.parser').find('title').getText().strip().replace('\n', '')
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(title, 'Password Recovery \ Chattings')
+        self.assertEqual(response.resolver_match._func_path, 'apps.users.views.AskEmailForPasswordRecoveryView')
+
+    def test_errors(self):
+        """
+        Check that view shows errors in template to client
+        """
+        response = self.client.post(
+            reverse('users:perform_password_recovery'),
+            data={'email': 'invalid@mail'},
+            follow=True,
+        )
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        err = soup.find('p', 'email-error').text
+
+        self.assertEqual(err, 'Enter a valid email address.')
+
+        response = self.client.post(
+            reverse('users:perform_password_recovery'),
+            data={'email': 'invalid@mail.co'},
+            follow=True,
+        )
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        err = soup.find('p', 'email-error').text
+
+        self.assertEqual(err, 'User with this email doesn\'t exist.')
+        
+    def test_logic(self):
+        """
+        Check that the view is processed correctly.
+        """
+        self.client.force_login(self.confirmed_u)
+        self.assertEqual(len(mail.outbox), 0)
+        # password recovery model doesn't exist yet
+        with self.assertRaises(PasswordRecovery.DoesNotExist):
+            self.confirmed_u.password_recovery
+        
+        response = self.client.get(reverse('users:perform_password_recovery'))
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+        
+        response = self.client.post(
+            reverse('users:perform_password_recovery'),
+            data={'email': 'temp1@mail.co'},
+            follow=True,
+        )
+        self.confirmed_u.refresh_from_db()
+        # client side:
+        soup = BeautifulSoup(response.content, 'html.parser')
+        success_message = soup.find('p', 'pwd-recovery-mail-sent').text
+        self.assertEqual(success_message, 'Now check your email for password recovery message.')
+        
+        # server side:
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertIsNotNone(self.confirmed_u.password_recovery)
+        self.assertEqual(response.resolver_match._func_path, 'apps.users.views.AskEmailForPasswordRecoveryView')
+
+        # check that the email message was sent
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Follow this link to continue password recovery', mail.outbox[0].body)
