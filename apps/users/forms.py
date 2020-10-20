@@ -43,10 +43,10 @@ class PasswordResetForm(SetPasswordForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(user, *args, **kwargs)
 
-        self.fields['password1'].widget.attrs['class'] = 'field'
-        self.fields['password1'].help_text = ''
-        self.fields['password2'].widget.attrs['class'] = 'field'
-        self.fields['password2'].help_text = ''
+        self.fields['new_password1'].widget.attrs['class'] = 'field'
+        self.fields['new_password1'].help_text = ''
+        self.fields['new_password2'].widget.attrs['class'] = 'field'
+        self.fields['new_password2'].help_text = ''
 
 
 class AskEmailForm(forms.Form):
