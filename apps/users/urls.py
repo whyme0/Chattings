@@ -37,7 +37,7 @@ urlpatterns = [
 
     path(
         'auth/password-recovery/<slug:token>',
-        views.PasswordResetyView.as_view(),
+        views.PasswordResetView.as_view(),
         name='recover_password',
     ),
 
