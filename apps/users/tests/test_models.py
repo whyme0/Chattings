@@ -100,10 +100,9 @@ class TestPasswordRecoveryModel(TestCase):
             password='hardpwd123',
         )
     
-    def test_model_propertues(self):
+    def test_model_properties(self):
         """
-        Check that model successfully creates and
-        check it properties
+        Check that model successfully creates
         """
         pwd_recovery = PasswordRecovery.objects.create(profile=self.u)
 
