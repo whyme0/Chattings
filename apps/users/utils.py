@@ -165,11 +165,14 @@ def force_confirm_email(token: str):
      Args:
         token - token of EmailVerification model
     """
-    from .models import EmailVerification
-    can_login_permission = Permission.objects.get(codename='can_login')
-    verification = EmailVerification.objects.get(token=token)
-    verification.profile.user_permissions.add(can_login_permission)
-    verification.delete()
+    try:
+        from .models import EmailVerification
+        can_login_permission = Permission.objects.get(codename='can_login')
+        verification = EmailVerification.objects.get(token=token)
+        verification.profile.user_permissions.add(can_login_permission)
+        verification.delete()
+    except EmailVerification.DoesNotExist:
+        pass
 
 
 def confirm_email(token: str, request):
