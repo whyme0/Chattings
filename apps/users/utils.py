@@ -213,4 +213,5 @@ def recover_password(form, pwd_recovery_obj, request:Optional=None):
     form.save()
 
     if request:
-        success('Password changed.')
+        success(request, 'Password changed. You can login now.',
+            'success-pwd-reet')
