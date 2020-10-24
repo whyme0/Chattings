@@ -206,7 +206,11 @@ def recover_password(form, pwd_recovery_obj, request:Optional=None):
     3. Save user model with changed data;
     """
     # step 1
-    force_confirm_email(pwd_recovery_obj.profile.email_verification.token)
+    try:
+        from .models import EmailVerification
+        force_confirm_email(pwd_recovery_obj.profile.email_verification.token)
+    except EmailVerification.DoesNotExist:
+        pass
     # step 2
     pwd_recovery_obj.delete()
     # step 3
@@ -214,4 +218,4 @@ def recover_password(form, pwd_recovery_obj, request:Optional=None):
 
     if request:
         success(request, 'Password changed. You can login now.',
-            'success-pwd-reet')
+            'success-pwd-reset')
