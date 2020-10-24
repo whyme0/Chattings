@@ -38,7 +38,8 @@
             
             {% endfor %}
             
-            <input value="Create" type="submit" disabled>
+            <a href="{% url 'users:login' %}">I'm already have an account.</a>
+            <br><input value="Create" type="submit" disabled>
         </form>
     </div>
 {% endblock content %}
