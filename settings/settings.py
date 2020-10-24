@@ -156,6 +156,9 @@ MEDIA_URL = '/media/'
 # Settings for login
 LOGIN_REDIRECT_URL =  '/admin/'
 
+# Settings for registration
+REGISTRATION_REDIRECT_URL = LOGIN_REDIRECT_URL
+
 # Settings for email
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = '465'
