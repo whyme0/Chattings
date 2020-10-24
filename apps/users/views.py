@@ -1,6 +1,8 @@
 from django.views.generic import (FormView, TemplateView, RedirectView,
     DetailView)
 from django.core.exceptions import SuspiciousOperation
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
 from django.contrib.auth import login, authenticate
 from django.contrib.messages import error, success
 from django.contrib.auth.models import Permission
@@ -51,6 +53,19 @@ class UserRegistrationView(FormView):
     template_name = 'users/registration.html'
     success_url = '/auth/login/'
     form_class = UserRegistrationForm
+    redirect_authenticated_user = True
+
+    @method_decorator(never_cache)
+    def dispatch(self, request, *args, **kwargs):
+        if self.redirect_authenticated_user and self.request.user.is_authenticated:
+            redirect_to = settings.LOGIN_REDIRECT_URL
+            if redirect_to == self.request.path:
+                raise ValueError(
+                    "Redirection loop for authenticated user detected. Check that "
+                    "your REGISTRATION_REDIRECT_URL doesn't point to a login page."
+                )
+            return redirect(redirect_to)
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form_class=None):
         user = Profile.objects.create_user(
@@ -135,12 +150,12 @@ class PasswordResetView(FormView):
             if self.pwd_recovery.is_token_expired():
                 raise SuspiciousOperation('Token expired.')
         except PasswordRecovery.DoesNotExist:
-            SuspiciousOperation('Token doesn\'t exist.')
+            raise SuspiciousOperation('Token doesn\'t exist.')
         if self.pwd_recovery:
             return self.pwd_recovery
 
     def form_valid(self, form):
-        recover_password(form, self.pwd_recovery)
+        recover_password(form, self.pwd_recovery, self.request)
         return redirect('users:login')
 
 
