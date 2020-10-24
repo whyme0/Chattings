@@ -47,7 +47,7 @@ class TestLoginView(TestCase):
         response = self.client.get(reverse('users:login'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.resolver_match._func_path, 'apps.users.views.UserLoginView')
+        self.assertEqual(response.resolver_match.func.view_class, views.UserLoginView)
         
         title = BeautifulSoup(response.content, features='html.parser').find('title').getText().strip().replace('\n', '')
         self.assertEqual(title, 'Login \ Chattings')
@@ -138,7 +138,7 @@ class TestRegistrationView(TestCase):
         response = self.client.get(reverse('users:registration'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.resolver_match._func_path, 'apps.users.views.UserRegistrationView')
+        self.assertEqual(response.resolver_match.func.view_class, views.UserRegistrationView)
         
         title = BeautifulSoup(response.content, features='html.parser').find('title').getText().strip().replace('\n', '')
         self.assertEqual(title, 'Registration \ Chattings')
@@ -248,7 +248,7 @@ class TestEmailConfirmationView(TestCase):
         }))
         
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.resolver_match._func_path, 'apps.users.views.EmailConfirmationView')
+        self.assertEqual(response.resolver_match.func.view_class, views.EmailConfirmationView)
 
         title = BeautifulSoup(response.content, 'html.parser').find('title').getText().strip().replace('\n', '')
         self.assertEqual(title, 'Email confirmation \ Chattings')
@@ -403,7 +403,7 @@ class TestAskEmailPasswordRecoveryView(TestCase):
         
         self.assertEqual(response.status_code, 200)
         self.assertEqual(title, 'Password Recovery \ Chattings')
-        self.assertEqual(response.resolver_match._func_path, 'apps.users.views.AskEmailForPasswordRecoveryView')
+        self.assertEqual(response.resolver_match.func.view_class, views.AskEmailForPasswordRecoveryView)
 
     def test_errors(self):
         """
@@ -459,8 +459,191 @@ class TestAskEmailPasswordRecoveryView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.wsgi_request.user.is_authenticated)
         self.assertIsNotNone(self.confirmed_u.password_recovery)
-        self.assertEqual(response.resolver_match._func_path, 'apps.users.views.AskEmailForPasswordRecoveryView')
+        self.assertEqual(response.resolver_match.func.view_class, views.AskEmailForPasswordRecoveryView)
 
         # check that the email message was sent
         self.assertEqual(len(mail.outbox), 1)
         self.assertIn('Follow this link to continue password recovery', mail.outbox[0].body)
+
+
+class TestPasswordResetView(TestCase):
+    """
+    Plan:
+    * Test fundamental view behavior.
+    * Test for expected errors
+    * Test for main logic: view works as originally intended
+    """
+    def setUp(self):
+        content_type = ContentType.objects.get_for_model(Profile)
+        can_login_perm = Permission.objects.create(
+            codename='can_login',
+            name='Can login to site',
+            content_type=content_type,
+        )
+        force_confirm_email(self.confirmed_u.email_verification.token)
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.confirmed_u = Profile.objects.create_user(
+            username='temp1',
+            email='temp1@mail.co',
+            password='hardpwd123',
+        )
+
+        cls.notconfirmed_u = Profile.objects.create_user(
+            username='temp2',
+            email='temp2@mail.co',
+            password='hardpwd123',
+        )
+        PasswordRecovery.objects.create(profile=cls.confirmed_u)
+        PasswordRecovery.objects.create(profile=cls.notconfirmed_u)
+
+    def test_basics(self):
+        """
+        Check basic properties such as
+        status_code, page title, view.
+        """
+        response = self.client.get(
+            reverse(
+                'users:recover_password',
+                kwargs={
+                    'token': self.confirmed_u.password_recovery.token,
+                },
+            ),
+            follow=True,
+        )
+
+        title = BeautifulSoup(response.content, 'html.parser').find('title').getText().strip().replace('\n', '')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(title, 'Password Recovery \ Chattings')
+        self.assertEqual(response.resolver_match.func.view_class, views.PasswordResetView)
+    
+    def test_for_bad_request_errors(self):
+        """
+        This test check if token invalid then server will send
+        BadRequest to the Browser.
+        """
+        # Invalid token:
+        response = self.client.get(
+            reverse(
+                'users:recover_password',
+                kwargs={
+                    'token': 'invalid_token',
+                },
+            ),
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_for_html_form_errors(self):
+        """
+        This test check if client entered invalid
+        data to params then errors will be shown
+        in template.
+        """
+        # PART 1
+        response = self.client.post(
+            reverse(
+                'users:recover_password',
+                kwargs={
+                    'token': self.confirmed_u.password_recovery.token
+                }
+            ),
+            data={
+                'new_password1': '123',
+                'new_password2': '123',
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        
+        errors = BeautifulSoup(response.content, 'html.parser').find_all('p', 'field_error')
+        
+        self.assertEqual(errors[0].text, 'This password is too short. It must contain at least 8 characters.')
+        self.assertEqual(errors[1].text, 'This password is too common.')
+        self.assertEqual(errors[2].text, 'This password is entirely numeric.')
+
+        # PART 2        
+        response = self.client.post(
+            reverse(
+                'users:recover_password',
+                kwargs={
+                    'token': self.confirmed_u.password_recovery.token,
+                }
+            ),
+            data={
+                'new_password1': 'uiuiuiuiu',
+                'new_password2': 'iuiuiuiui',
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        errors = BeautifulSoup(response.content, 'html.parser').find_all('p', 'field_error')
+
+        self.assertEqual(errors[0].text, 'The two password fields didn’t match.')
+
+    def test_for_success_recovery(self):
+        """
+        Test that with proper data user
+        can recover password
+        """
+        self.assertTrue(self.confirmed_u.check_password('hardpwd123'))
+        response = self.client.post(
+            reverse(
+                'users:recover_password',
+                kwargs={
+                    'token': self.confirmed_u.password_recovery.token,
+                }
+            ),
+            data={
+                'new_password1': 'goodPwd345',
+                'new_password2': 'goodPwd345',
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.confirmed_u.refresh_from_db()
+
+        with self.assertRaises(PasswordRecovery.DoesNotExist):
+            self.confirmed_u.password_recovery
+
+        self.assertFalse(self.confirmed_u.check_password('hardpwd123'))
+        self.assertTrue(self.confirmed_u.check_password('goodPwd345'))
+
+        self.assertEqual(response.resolver_match.func.view_class, views.UserLoginView)
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        success_msg = soup.find('p', 'success-pwd-reset')
+
+        self.assertEqual(success_msg.text, 'Password changed. You can login now.')
+
+    def test_for_success_recovery_and_email_confirmation(self):
+        """
+        Test that with proper data user can recover
+        password and confirm email, if it not confirmed
+        """
+        self.assertFalse(self.notconfirmed_u.is_email_confirmed())
+        self.assertTrue(self.notconfirmed_u.check_password('hardpwd123'))
+        response = self.client.post(
+            reverse(
+                'users:recover_password',
+                kwargs={
+                    'token': self.notconfirmed_u.password_recovery.token,
+                }
+            ),
+            data={
+                'new_password1': 'goodPwd345',
+                'new_password2': 'goodPwd345',
+            },
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.notconfirmed_u.refresh_from_db()
+
+        self.assertTrue(self.notconfirmed_u.has_perm('users.can_login'))
+        with self.assertRaises(PasswordRecovery.DoesNotExist):
+            self.notconfirmed_u.password_recovery
+
+        self.assertFalse(self.notconfirmed_u.check_password('hardpwd123'))
+        self.assertTrue(self.notconfirmed_u.check_password('goodPwd345'))
