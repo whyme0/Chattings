@@ -22,6 +22,8 @@
                 <p class="text-warning"><a href="{{resend_email}}" class="resend-email-link">Click here to resend email confirmation letter</a></p>
             {% elif 'success-registration' in message.extra_tags %}
                 <p class="text-success {{message.extra_tags}}">{{message}}</p>
+            {% elif 'success-pwd-reset' in message.extra_tags %}
+                <p class="text-success {{message.extra_tags}}">{{message}}</p>
             {% endif %}
         {% endfor %}
     </div>
@@ -47,6 +49,7 @@
             {% endfor %}
             
             <a href="{% url 'users:registration' %}" class="d-block">Create new account</a>
+            <a href="{% url 'users:perform_password_recovery' %}">Reset password</a><br>
             <input value="Sign in" type="submit" disabled>
         </form>
     </div>
