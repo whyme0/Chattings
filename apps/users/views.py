@@ -58,7 +58,7 @@ class UserRegistrationView(FormView):
     @method_decorator(never_cache)
     def dispatch(self, request, *args, **kwargs):
         if self.redirect_authenticated_user and self.request.user.is_authenticated:
-            redirect_to = settings.LOGIN_REDIRECT_URL
+            redirect_to = settings.REGISTRATION_REDIRECT_URL
             if redirect_to == self.request.path:
                 raise ValueError(
                     "Redirection loop for authenticated user detected. Check that "
