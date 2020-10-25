@@ -647,3 +647,41 @@ class TestPasswordResetView(TestCase):
 
         self.assertFalse(self.notconfirmed_u.check_password('hardpwd123'))
         self.assertTrue(self.notconfirmed_u.check_password('goodPwd345'))
+
+
+class TestProfileLogoutView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u = Profile.objects.create_user(
+            username='temp1',
+            email='temp1@mail.co',
+            password='hardpwd123',
+        )
+    
+    def test_main(self):
+        """Check that view works as expected"""
+        self.client.force_login(self.u)
+        response = self.client.get(
+            '/test/',
+        )
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+        response = self.client.get(
+            reverse('users:logout'),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.resolver_match.func.view_class, views.ProfileLogoutView)
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+    
+    def test_login_required(self):
+        """Check that if user not login then user can't logout"""
+        response = self.client.get('/test/')
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+        response = response = self.client.get(
+            reverse('users:logout'),
+            follow=True
+        )
+
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
