@@ -1,9 +1,10 @@
 from django.views.generic import (FormView, TemplateView, RedirectView,
     DetailView)
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import SuspiciousOperation
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
-from django.contrib.auth import login, authenticate
 from django.contrib.messages import error, success
 from django.contrib.auth.models import Permission
 from django.contrib.auth.views import LoginView
@@ -157,6 +158,18 @@ class PasswordResetView(FormView):
     def form_valid(self, form):
         recover_password(form, self.pwd_recovery, self.request)
         return redirect('users:login')
+
+
+@method_decorator(login_required, name='dispatch')
+class ProfileLogoutView(RedirectView):
+    def get(self, request, *args, **kwargs):
+        logout(request)
+        return redirect(self.get_redirect_url())
+    
+    def get_redirect_url(self, *args, **kwargs):
+        super().get_redirect_url(*args, **kwargs)
+        return reverse('users:login')
+
 
 
 class ProfileView(DetailView):
