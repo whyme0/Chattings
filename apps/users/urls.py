@@ -41,6 +41,12 @@ urlpatterns = [
         name='recover_password',
     ),
 
+    path(
+        'auth/logout/',
+        views.ProfileLogoutView.as_view(),
+        name='logout',
+    ),
+
     # Part specially for user, user settings, user data, etc.
     path(
         'profile/<slug:username>',
