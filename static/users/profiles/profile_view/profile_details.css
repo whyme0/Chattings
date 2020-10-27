@@ -1,0 +1,13 @@
+.profile__avatar img{
+    border: 1.5px solid rgb(27, 27, 27);
+    max-width: 100%;
+    height: auto;
+}
+
+.profile__personal span {
+    cursor: default;
+}
+
+.profile__personal{
+    border-top: 1.5px solid rgb(27, 27, 27;
+}
