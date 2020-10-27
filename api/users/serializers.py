@@ -8,5 +8,5 @@ class ProfileSerializer(serializers.HyperlinkedModelSerializer):
         model = Profile
         fields = ['url', 'id', 'username', 'avatar_image', 'date_joined']
         extra_kwargs = {
-            'url': {'view_name': 'users:profile', 'lookup_field': 'username'}
+            'url': {'view_name': 'users:profile', 'lookup_field': 'pk'}
         }
