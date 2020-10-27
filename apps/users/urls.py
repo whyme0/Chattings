@@ -49,7 +49,7 @@ urlpatterns = [
 
     # Part specially for user, user settings, user data, etc.
     path(
-        'profile/<slug:username>',
+        'profile/<int:pk>',
         views.ProfileView.as_view(),
         name='profile',
     ),
