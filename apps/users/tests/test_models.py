@@ -1,3 +1,5 @@
+from time import sleep
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.validators import ValidationError
 from django.contrib.auth.models import Permission
@@ -122,6 +124,11 @@ class TestTokenModel(TestCase):
         old_creation_date = t.creation_date
         old_expiration_date = t.expiration_date
 
+        # Simulates waiting because sometimes test executes so quickly
+        # that time between initializing old_expiration_date and
+        # refreshing token model equals to zero, so old_creation_date == t.creation_date
+        # but this should not equal.
+        sleep(0.025)
         t.refresh()
 
         self.assertNotEqual(old_token, t.token)
