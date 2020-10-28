@@ -171,6 +171,10 @@ class ProfileLogoutView(RedirectView):
         return reverse('users:login')
 
 
-
 class ProfileView(DetailView):
-    pass
+    """
+    View with detailed information for specific profile model
+    """
+    template_name = 'users/profiles/profile_details.html'
+    context_object_name = 'profile'
+    model = Profile
