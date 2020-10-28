@@ -685,3 +685,24 @@ class TestProfileLogoutView(TestCase):
         )
 
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+
+class TestProfileView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u = Profile.objects.create_user(
+            username='temp1',
+            email='temp1@mail.co',
+            password='hardpwd123',
+        )
+
+    def test_fundamental_view_properties(self):
+        """Testing title, templates, status code, etc."""
+        response = self.client.get(
+            reverse('users:profile', kwargs={'pk' : self.u.pk})
+        )
+        title = BeautifulSoup(response.content, features='html.parser').find('title').getText().strip().replace('\n', '')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, views.ProfileView)
+        self.assertEqual(title, '\\ Chattings')
