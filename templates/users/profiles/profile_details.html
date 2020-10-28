@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block page_title %}
+    {{profile.username}}
+{% endblock page_title %}
+
+{% block page_head %}
+    <link rel="stylesheet" href="{% static 'users/profiles/profile_view/profile_details.css' %}">
+{% endblock page_head %}
+
+
+
+{% block content %}
+
+    <div class="d-flex jusitfy-content-start mt-4 align-items-start">
+        <div class="profile__wrapper">
+            <div class="profile__avatar text-center">
+                <img src="{{MEDIA_URL}}{{profile.avatar_image}}" alt="profile__avatar" width="170" class="shadow-sm bg-light">
+            </div>
+            
+            <div class="profile__personal mt-2 pt-2">
+                <button id="profileInfoOpenButton">Close profile info</button>
+
+                <!-- Dropdown block with profile information -->
+                <div class="dropdown__profile-info pl-1" style="display:block;">
+                    Profile info here
+                    <ul>
+                        {% for field in profile_info %}
+                            <li>{{field}}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="my-2"></div>
+
+                <button id="profileChannelsOpenButton">Show profile channels</button>
+
+                <!-- Dropdown block with profile information -->
+                <div class="dropdown__profile-channels pl-1" style="display:none;">
+                    {% for channel in profile_channels %}
+                        <li>{{channel}}</li>
+                    {% empty %}
+                        <span>No channels yet.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="notes__wrapper ml-3">
+            <span class="h3">Profile's notes</span>
+
+            <div class="notes__list">
+                {% for note in profile__notes %}
+                    <div class="profile__note">
+                        <p class="note__content">{{note.content}}</p>
+                        <span class="note__pub-date">Date: {{note.pub_date}}</span>
+                    </div>
+                {% empty %}
+                    <span>This profile is not posted notes yet.</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+
+
+
+{% block page_scripts %}
+    <script src="{% static 'users/profiles/profile_view/profile_details.js' %}"></script>
+{% endblock page_scripts%}
