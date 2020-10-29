@@ -155,6 +155,7 @@ MEDIA_URL = '/media/'
 
 # Settings for login
 LOGIN_REDIRECT_URL =  '/admin/'
+LOGIN_URL = '/auth/login/'
 
 # Settings for registration
 REGISTRATION_REDIRECT_URL = LOGIN_REDIRECT_URL
