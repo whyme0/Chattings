@@ -685,6 +685,7 @@ class TestProfileLogoutView(TestCase):
         )
 
         self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.resolver_match.func.view_class, views.UserLoginView)
 
 
 class TestProfileView(TestCase):
