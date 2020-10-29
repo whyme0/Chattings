@@ -40,6 +40,9 @@ class UserLoginView(LoginView):
 
         return super().form_valid(*args, **kwargs)
     
+    def get_success_url(self):
+        return reverse('users:profile', kwargs={'pk': self.request.user.pk})
+    
     def get_context_data(self, *args, **kwargs):
         ctx = super().get_context_data(*args, **kwargs)
 
@@ -160,7 +163,7 @@ class PasswordResetView(FormView):
         return redirect('users:login')
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required(redirect_field_name=None), name='dispatch')
 class ProfileLogoutView(RedirectView):
     def get(self, request, *args, **kwargs):
         logout(request)
