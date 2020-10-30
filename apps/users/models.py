@@ -124,3 +124,10 @@ class PasswordRecovery(Token):
 
     def __str__(self):
         return f'{self.profile.email}: {self.creation_date}'
+
+
+class PrivacySettings(models.Model):
+    """
+    PrivacySettings need to let profile determine which
+    model data will be public and can be viewed by other users.
+    """
