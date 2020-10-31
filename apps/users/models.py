@@ -131,3 +131,12 @@ class PrivacySettings(models.Model):
     PrivacySettings need to let profile determine which
     model data will be public and can be viewed by other users.
     """
+    related_profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name='privacy_settings'
+    )
+
+    is_username_public = models.BooleanField(default=False)
+    is_email_public = models.BooleanField(default=False)
+    is_date_joined_public = models.BooleanField(default=False)
