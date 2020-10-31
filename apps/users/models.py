@@ -6,9 +6,13 @@ from django.utils import timezone
 from django.db import models
 
 from .validators import UsernameRegexValidator 
-
 from .signals.signals import post_create_user
+from .managers import ProfileManager
 from .utils import generate_token
+
+
+def user_directory_upload(instance, filename):
+    return 'user_avatars/{0}'.format(instance.username)
 
 
 class Profile(AbstractUser):
@@ -52,43 +56,6 @@ class Profile(AbstractUser):
         except EmailVerification.DoesNotExist:
             return True
 
-def user_directory_upload(instance, filename):
-    return 'user_avatars/{0}'.format(instance.username)
-
-
-class EmailVerification(Token):
-    """
-    Model with data to help confirm user by email
-
-     Attrs:
-       profile - profile which need to be confirmed.
-    """
-    profile = models.OneToOneField(
-        Profile,
-        on_delete=models.CASCADE,
-        related_name='email_verification',
-    )
-
-    def __str__(self):
-        return f'{self.profile.email}: {self.creation_date}'
-
-
-class PasswordRecovery(Token):
-    """
-    Model with data to help recover password by email.
-
-     Attrs:
-       profile - profile which need to recover password
-    """
-    profile = models.OneToOneField(
-        Profile,
-        on_delete=models.CASCADE,
-        related_name='password_recovery',
-    )
-
-    def __str__(self):
-        return f'{self.profile.email}: {self.creation_date}'
-
 
 class Token(models.Model):
     """
@@ -129,6 +96,40 @@ class Token(models.Model):
         return timezone.now() > self.expiration_date
 
 
+class EmailVerification(Token):
+    """
+    Model with data to help confirm user by email
+
+     Attrs:
+       profile - profile which need to be confirmed.
+    """
+    profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name='email_verification',
+    )
+
+    def __str__(self):
+        return f'{self.profile.email}: {self.creation_date}'
+
+
+class PasswordRecovery(Token):
+    """
+    Model with data to help recover password by email.
+
+     Attrs:
+       profile - profile which need to recover password
+    """
+    profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name='password_recovery',
+    )
+
+    def __str__(self):
+        return f'{self.profile.email}: {self.creation_date}'
+
+
 class PrivacySettings(models.Model):
     """
     PrivacySettings need to let profile determine which
@@ -143,14 +144,3 @@ class PrivacySettings(models.Model):
     is_username_public = models.BooleanField(default=False)
     is_email_public = models.BooleanField(default=False)
     is_date_joined_public = models.BooleanField(default=False)
-
-
-class ProfileManager(UserManager):
-    def _create_user(self, username, email, password, **extra_fields):
-        """
-        We override this method because we need to do some
-        additional step after creating user
-        """
-        user = super()._create_user(username, email, password, **extra_fields)
-        post_create_user.send(sender=user)
-        return user
