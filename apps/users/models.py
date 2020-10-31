@@ -1,16 +1,93 @@
 from datetime import timedelta
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.validators import EmailValidator
 from django.utils import timezone
 from django.db import models
 
 from .validators import UsernameRegexValidator 
+
+from .signals.signals import post_create_user
 from .utils import generate_token
 
 
+class Profile(AbstractUser):
+    avatar_image = models.ImageField(
+        upload_to=user_directory_upload,
+        blank=True,
+        default='user_avatars/default_user_avatar.png',
+    )
+
+    username = models.CharField(
+        help_text='Required. 45 characters or fewer. Letters, digits and -/_ only.',
+        max_length=45,
+        validators=[UsernameRegexValidator()],
+        error_messages={
+            'unique': ('A user with that username already exists.'),
+        },
+        unique=True,
+    )
+
+    email = models.EmailField(
+        blank=False,
+        unique=True,
+    )
+
+    objects = ProfileManager()
+
+    def save(self, **kwargs):
+        super().save(**kwargs)
+
+        # When profile creates in first time
+        if not EmailVerification.objects.filter(profile=self):
+            EmailVerification(profile=self).save()
+
+    def __str__(self):
+        return self.email
+    
+    def is_email_confirmed(self):
+        try:
+            self.email_verification
+            return False
+        except EmailVerification.DoesNotExist:
+            return True
+
 def user_directory_upload(instance, filename):
     return 'user_avatars/{0}'.format(instance.username)
+
+
+class EmailVerification(Token):
+    """
+    Model with data to help confirm user by email
+
+     Attrs:
+       profile - profile which need to be confirmed.
+    """
+    profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name='email_verification',
+    )
+
+    def __str__(self):
+        return f'{self.profile.email}: {self.creation_date}'
+
+
+class PasswordRecovery(Token):
+    """
+    Model with data to help recover password by email.
+
+     Attrs:
+       profile - profile which need to recover password
+    """
+    profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name='password_recovery',
+    )
+
+    def __str__(self):
+        return f'{self.profile.email}: {self.creation_date}'
 
 
 class Token(models.Model):
@@ -52,86 +129,12 @@ class Token(models.Model):
         return timezone.now() > self.expiration_date
 
 
-class Profile(AbstractUser):
-    avatar_image = models.ImageField(
-        upload_to=user_directory_upload,
-        blank=True,
-        default='user_avatars/default_user_avatar.png',
-    )
-
-    username = models.CharField(
-        help_text='Required. 45 characters or fewer. Letters, digits and -/_ only.',
-        max_length=45,
-        validators=[UsernameRegexValidator()],
-        error_messages={
-            'unique': ('A user with that username already exists.'),
-        },
-        unique=True,
-    )
-
-    email = models.EmailField(
-        blank=False,
-        unique=True,
-    )
-
-    def save(self, **kwargs):
-        super().save(**kwargs)
-
-        # When profile creates in first time
-        if not EmailVerification.objects.filter(profile=self):
-            EmailVerification(profile=self).save()
-
-    def __str__(self):
-        return self.email
-    
-    def is_email_confirmed(self):
-        try:
-            self.email_verification
-            return False
-        except EmailVerification.DoesNotExist:
-            return True
-
-
-class EmailVerification(Token):
-    """
-    Model with data to help confirm user by email
-
-     Attrs:
-       profile - profile which need to be confirmed.
-    """
-    profile = models.OneToOneField(
-        Profile,
-        on_delete=models.CASCADE,
-        related_name='email_verification',
-    )
-
-    def __str__(self):
-        return f'{self.profile.email}: {self.creation_date}'
-
-
-class PasswordRecovery(Token):
-    """
-    Model with data to help recover password by email.
-
-     Attrs:
-       profile - profile which need to recover password
-    """
-    profile = models.OneToOneField(
-        Profile,
-        on_delete=models.CASCADE,
-        related_name='password_recovery',
-    )
-
-    def __str__(self):
-        return f'{self.profile.email}: {self.creation_date}'
-
-
 class PrivacySettings(models.Model):
     """
     PrivacySettings need to let profile determine which
     model data will be public and can be viewed by other users.
     """
-    related_profile = models.OneToOneField(
+    profile = models.OneToOneField(
         Profile,
         on_delete=models.CASCADE,
         related_name='privacy_settings'
@@ -140,3 +143,14 @@ class PrivacySettings(models.Model):
     is_username_public = models.BooleanField(default=False)
     is_email_public = models.BooleanField(default=False)
     is_date_joined_public = models.BooleanField(default=False)
+
+
+class ProfileManager(UserManager):
+    def _create_user(self, username, email, password, **extra_fields):
+        """
+        We override this method because we need to do some
+        additional step after creating user
+        """
+        user = super()._create_user(username, email, password, **extra_fields)
+        post_create_user.send(sender=user)
+        return user
