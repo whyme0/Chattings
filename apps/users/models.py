@@ -144,3 +144,17 @@ class PrivacySettings(models.Model):
     is_username_public = models.BooleanField(default=False)
     is_email_public = models.BooleanField(default=False)
     is_date_joined_public = models.BooleanField(default=False)
+
+    def get_public_info(self) -> dict:
+        # Problem of this function is that when one day another programmer will
+        # change (e.g. add/remove) current model's fields then programmer
+        # also will need to correcy this function. Such way is very dirty.
+        p = self.profile
+        return {
+            'Username': p.username if self.is_username_public else 'Hidden',
+            'Email': p.email if self.is_email_public else 'Hidden',
+            'Date joined': p.date_joined if self.is_date_joined_public else 'Hidden',
+        }
+
+    def __str__(self):
+        return str(self.profile.username)
