@@ -181,3 +181,9 @@ class ProfileView(DetailView):
     template_name = 'users/profiles/profile_details.html'
     context_object_name = 'profile'
     model = Profile
+
+    def get_context_data(self, *args, **kwargs):
+        profile = self.get_object()
+        ctx = super().get_context_data(*args, **kwargs)
+        ctx['profile_info'] = profile.privacy_settings.get_public_info().items()
+        return ctx
