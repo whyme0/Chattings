@@ -172,5 +172,6 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer', # use only json representation
-    ]
+    ],
+    'DATETIME_FORMAT': '%d.%m.%Y %H:%M:%S',
 }
