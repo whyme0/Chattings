@@ -58,3 +58,18 @@ class TestProfileViewSet(APITestCase):
 
         self.assertEqual(r1.status_code, status.HTTP_200_OK)
         self.assertEqual(r2.status_code, status.HTTP_200_OK)
+    
+    def test_for_profile(self):
+        expecting_profile_data = {
+            'id': self.u2.id,
+            'username': 'temp2',
+            'date_joined': self.u2.date_joined.strftime('%d.%m.%Y %H:%M:%S'),
+            'url': 'http://testserver' + reverse('users:profile', kwargs={'pk': self.u2.pk}),
+        }
+        response = self.client.get(
+            reverse('api-profile', kwargs={'pk': self.u2.pk}),
+            format='json',
+        )
+
+        for k, v in expecting_profile_data.items():
+            self.assertEqual(v, response.data[k])
