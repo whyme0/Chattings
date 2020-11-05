@@ -1,11 +1,11 @@
-from django.contrib.auth.forms import (AuthenticationForm, UserCreationForm,
-    UsernameField, SetPasswordForm)
-from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import (AuthenticationForm, SetPasswordForm,
+                                       UserCreationForm, UsernameField)
+from django.core.exceptions import ValidationError
 
+from .models import PrivacySettings, Profile
 from .validators import username_exist_validator
-from .models import Profile
 
 
 class UserLoginForm(AuthenticationForm):
@@ -55,3 +55,9 @@ class AskEmailForm(forms.Form):
         help_text='We will sent password recovery letter on this email',
         widget=forms.EmailInput(attrs={'class': 'field'})
     )
+
+
+class PrivacySettingsForm(forms.ModelForm):
+    class Meta:
+        model = PrivacySettings
+        exclude = ['profile']
