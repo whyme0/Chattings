@@ -29,41 +29,16 @@ class TestProfileViewSet(APITestCase):
             content_type=content_type,
         )
     
-    def test_basic(self):
-        response1 = self.client.get(
-            reverse('api-profiles'),
-        )
-        response2 = self.client.get(
+    def test_basics(self):
+        response = self.client.get(
             reverse('api-profile', kwargs={'pk': self.u1.pk}),
         )
 
-        self.assertEqual(response1.status_code, status.HTTP_200_OK)
-        self.assertEqual(response2.status_code, status.HTTP_200_OK)
-    
-    def test_for_profiles(self):
-        response = self.client.get(
-            reverse('api-profiles'),
-            format='json'
-        )
-        u1_url = response.json()[0]['url']
-        u2_url = response.json()[1]['url']
-        
-        r1 = self.client.get(u1_url)
-        r2 = self.client.get(u2_url)
-        
-        self.assertEqual(len(response.json()), 2)
-        self.assertEqual(response.json()[0]['username'], self.u1.username)
-        self.assertEqual(response.json()[1]['username'], self.u2.username)
-
-
-        self.assertEqual(r1.status_code, status.HTTP_200_OK)
-        self.assertEqual(r2.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
     
     def test_for_profile(self):
         expecting_profile_data = {
             'id': self.u2.id,
-            'username': 'temp2',
-            'date_joined': self.u2.date_joined.strftime('%d.%m.%Y %H:%M:%S'),
             'url': 'http://testserver' + reverse('users:profile', kwargs={'pk': self.u2.pk}),
         }
         response = self.client.get(
@@ -73,3 +48,13 @@ class TestProfileViewSet(APITestCase):
 
         for k, v in expecting_profile_data.items():
             self.assertEqual(v, response.data[k])
+    
+    def test_for_404_resposne(self):
+        response = self.client.get(
+            reverse('api-profile', kwargs={'pk': 89234}),
+            format='json',
+        )
+
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(str(response.data['detail']), 'Not found.')
