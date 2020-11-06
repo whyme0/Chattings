@@ -4,7 +4,7 @@
 
 
 {% block page_title %}
-    {{profile_username}}
+    Profile №{{profile.id}}
 {% endblock page_title %}
 
 {% block page_head %}
@@ -22,7 +22,12 @@
             </div>
             
             <div class="profile__personal mt-2 pt-2">
-                <button id="profileInfoOpenButton">Close profile info</button>
+                {% if user == profile %}
+                    <a href="{% url 'users:edit-profile' %}" id="profileEditLink" class="w-100">Edit Profile</a>
+                {% endif %}
+
+
+                <button id="profileInfoOpenButton" class="mt-2">Close profile info</button>
 
                 <!-- Dropdown block with profile information -->
                 <div class="dropdown__profile-info pl-1" style="display:block;">
