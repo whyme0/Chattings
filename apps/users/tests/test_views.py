@@ -707,3 +707,40 @@ class TestProfileView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.resolver_match.func.view_class, views.ProfileView)
         self.assertEqual(title, '\\ Chattings')
+
+
+class TestProfileEditView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u = Profile.objects.create_user(
+            username='temp1',
+            email='temp1@mail.co',
+            password='hardpwd123',
+        )
+    
+    def setUp(self):
+        content_type = ContentType.objects.get_for_model(Profile)
+        can_login_perm = Permission.objects.create(
+            codename='can_login',
+            name='Can login to site',
+            content_type=content_type,
+        )
+        force_confirm_email(self.u.email_verification.token)
+
+    def test_basic(self):
+        response = self.client.get(
+            reverse('users:edit-profile'),
+            follow=True,
+        )
+        self.assertEqual(response.resolver_match.func.view_class, views.UserLoginView)
+
+        self.client.force_login(self.u)
+        response = self.client.get(
+            reverse('users:edit-profile'),
+        )
+        title = BeautifulSoup(response.content, features='html.parser').find('title').getText().strip().replace('\n', '')
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, views.ProfileEditView)
+        self.assertEqual(title, 'Profile Editing \ Chattings')
+
