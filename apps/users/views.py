@@ -187,3 +187,8 @@ class ProfileView(DetailView):
         ctx = super().get_context_data(*args, **kwargs)
         ctx['profile_info'] = profile.privacy_settings.get_public_info().items()
         return ctx
+
+
+@method_decorator(login_required(redirect_field_name=None), name='dispatch')
+class ProfileEditView(TemplateView):
+    template_name = 'users/profiles/edit_profile.html'
