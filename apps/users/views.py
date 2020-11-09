@@ -1,5 +1,5 @@
 from django.views.generic import (FormView, TemplateView, RedirectView,
-    DetailView)
+    DetailView, View)
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import SuspiciousOperation
@@ -9,18 +9,18 @@ from django.contrib.messages import error, success
 from django.contrib.auth.models import Permission
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
+from django.http import Http404, HttpResponse
 from django.utils.html import strip_tags
 from django.utils import timezone
 from django.conf import settings
 from django.urls import reverse
-from django.http import Http404
 from django.db.models import Q
 
 
 from .utils import (perform_email_verification, confirm_email,
     find_user_or_404, find_user, perform_password_recovery, recover_password)
 from .forms import (UserLoginForm, UserRegistrationForm, AskEmailForm,
-    PasswordResetForm)
+    PasswordResetForm, PrivacySettingsForm)
 from .models import Profile, PasswordRecovery
 
 
@@ -192,3 +192,19 @@ class ProfileView(DetailView):
 @method_decorator(login_required(redirect_field_name=None), name='dispatch')
 class ProfileEditView(TemplateView):
     template_name = 'users/profiles/edit_profile.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['privacy_settings_form'] = PrivacySettingsForm(self.request.user)
+        return ctx
+
+
+@method_decorator(login_required(redirect_field_name=None), name='dispatch')
+class PrivacySettingsFormHandlerView(View):
+    http_method_names = ['post']
+    def post(self, request, *args, **kwargs):
+        form = PrivacySettingsForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponse('Form successfully saved.')
+        return HttpResponse('Invalid post data.')
