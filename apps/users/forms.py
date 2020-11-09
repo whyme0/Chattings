@@ -1,3 +1,5 @@
+from typing import Dict
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (AuthenticationForm, SetPasswordForm,
@@ -61,3 +63,32 @@ class PrivacySettingsForm(forms.ModelForm):
     class Meta:
         model = PrivacySettings
         exclude = ['profile']
+    
+    def __init__(self, profile, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._set_default_values(profile.privacy_settings)
+
+    def _set_default_values(self, privacy_settings: PrivacySettings):
+        """
+        Set default values to form fields based on data
+        from related PrivacySettings model
+        """
+        data = self._normalize_data(privacy_settings.get_public_info())
+
+        for k, v in data.items():
+            self.fields[k].widget.attrs['selected'] = v
+
+    def _normalize_data(self, data: dict) -> Dict[str, bool]:
+        """
+        Convert data from passed data to proper format
+
+        Example: 'Some field' to 'is_some_field_public'
+        """
+        normalized_data = {}
+        for k, v in data.items():
+            field_name = k.lower().replace(' ', '_')
+            field_name = 'is_{}_public'.format(field_name)
+            field_value = v != 'Hidden'
+            normalized_data[field_name] = field_value
+        return normalized_data
