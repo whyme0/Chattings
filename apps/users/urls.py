@@ -58,5 +58,11 @@ urlpatterns = [
         'profile/editing/',
         views.ProfileEditView.as_view(),
         name='edit-profile',
-    )
+    ),
+
+    path(
+        'profile/privacysettingsformhandler/',
+        views.PrivacySettingsFormHandlerView.as_view(),
+        name='privacy-settings-form-handler',
+    ),
 ]
