@@ -706,7 +706,7 @@ class TestProfileView(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.resolver_match.func.view_class, views.ProfileView)
-        self.assertEqual(title, '\\ Chattings')
+        self.assertEqual(title, 'Profile №%d \\ Chattings' % self.u.id)
 
 
 class TestProfileEditView(TestCase):
