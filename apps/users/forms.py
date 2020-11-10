@@ -66,7 +66,9 @@ class PrivacySettingsForm(forms.ModelForm):
     
     def __init__(self, profile, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        
+        self.instance = profile.privacy_settings
+        
         self._set_default_values(profile.privacy_settings)
 
     def _set_default_values(self, privacy_settings: PrivacySettings):
@@ -77,7 +79,8 @@ class PrivacySettingsForm(forms.ModelForm):
         data = self._normalize_data(privacy_settings.get_public_info())
 
         for k, v in data.items():
-            self.fields[k].widget.attrs['selected'] = v
+            if v:
+                self.fields[k].widget.attrs['checked'] = ''
 
     def _normalize_data(self, data: dict) -> Dict[str, bool]:
         """
