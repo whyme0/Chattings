@@ -190,6 +190,7 @@ class ProfileView(DetailView):
 
 
 @method_decorator(login_required(redirect_field_name=None), name='dispatch')
+@method_decorator(never_cache, name='dispatch')
 class ProfileEditView(TemplateView):
     template_name = 'users/profiles/edit_profile.html'
 
