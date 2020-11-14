@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 
 {% block page_title %}
@@ -13,6 +14,8 @@
             border-color: #939393;
         }
     </style>
+
+    <link rel="stylesheet" href="{% static 'users/profiles/profile_edit_view/profile_edit.css' %}">
 {% endblock page_head %}
 
 
@@ -25,34 +28,41 @@
     <div class="row mt-4">
         <div class="col-4">
           <div class="list-group" id="list-tab" role="tablist">
-            <a class="list-group-item list-group-item-action active" id="list-home-list" data-toggle="list" href="#list-home" role="tab" aria-controls="home">Privacy Settings</a>
-            <a class="list-group-item list-group-item-action" id="list-profile-list" data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">Change password</a>
-            <a class="list-group-item list-group-item-action" id="list-messages-list" data-toggle="list" href="#list-messages" role="tab" aria-controls="messages">Change email</a>
+            <a class="list-group-item list-group-item-action active" id="list-privacy-settings" data-toggle="list" href="#list-home" role="tab" aria-controls="home">Privacy Settings</a>
+            <a class="list-group-item list-group-item-action" id="list-password" data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">Change password</a>
+            <a class="list-group-item list-group-item-action" id="list-change-email" data-toggle="list" href="#list-messages" role="tab" aria-controls="messages">Change email</a>
           </div>
         </div>
         <div class="col-8 p-0">
           <div class="tab-content" id="nav-tabContent">
             
             
-            <div class="tab-pane fade show active" id="list-home" role="tabpanel" aria-labelledby="list-home-list">
-                <form action="{% url 'users:privacy-settings-form-handler' %}" method="POST">{% csrf_token %}
+            <div class="tab-pane fade show active" id="list-home" role="tabpanel" aria-labelledby="list-privacy-settings">
+                <form action="{% url 'users:privacy-settings-form-handler' %}" method="POST" id="privacySettingsForm">{% csrf_token %}
                     {{privacy_settings_form.as_p}}
-                    <input type="submit" value="Save">
                 </form>
+                <input type="submit" value="Save" id="submitPrivacySettingsFormButton">
+                <span class="success-message">Saved.</span>
             </div>
 
 
             
-            <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">
+            <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-password">
                 This part of website is under development.
             </div>
             
             
             
-            <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">
+            <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-change-email">
                 This part of website is under development.
             </div>
           </div>
         </div>
     </div>
 {% endblock content %}
+
+
+
+{% block page_scripts %}
+    <script src="{% static 'users/profiles/profile_edit_view/profile_edit.js' %}" privacySettingsHandlerUrl="{% url 'users:privacy-settings-form-handler' %}"></script>
+{% endblock page_scripts %}
