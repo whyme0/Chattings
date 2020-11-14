@@ -744,3 +744,78 @@ class TestProfileEditView(TestCase):
         self.assertEqual(response.resolver_match.func.view_class, views.ProfileEditView)
         self.assertEqual(title, 'Profile Editing \ Chattings')
 
+
+class TestPrivacySettingsFormHandlerView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u = Profile.objects.create_user(
+            username='temp1',
+            email='temp1@mail.co',
+            password='hardpwd123',
+        )
+    
+    def setUp(self):
+        content_type = ContentType.objects.get_for_model(Profile)
+        can_login_perm = Permission.objects.create(
+            codename='can_login',
+            name='Can login to site',
+            content_type=content_type,
+        )
+        force_confirm_email(self.u.email_verification.token)
+    
+    def test_login_required(self):
+        response = self.client.get(
+            reverse('users:privacy-settings-form-handler'),
+            follow=True
+        )
+
+        self.assertEqual(response.resolver_match.func.view_class, views.UserLoginView)
+    
+    def test_for_errors(self):
+        self.client.force_login(self.u)
+        response = self.client.get(
+            reverse('users:privacy-settings-form-handler'),
+        )
+
+        self.assertEqual(response.status_code, 405)
+    
+    def test_view_for_correctness(self):
+        old_data = {
+            'is_email_public': self.u.privacy_settings.is_email_public,
+            'is_username_public': self.u.privacy_settings.is_username_public,
+            'is_date_joined_public': self.u.privacy_settings.is_date_joined_public,
+        }
+
+        self.client.force_login(self.u)
+        response = self.client.post(
+            reverse('users:privacy-settings-form-handler'),
+            data={
+                'is_email_public': True,
+                'is_username_public': True,
+                'is_date_joined_public': True
+            }
+        )
+        self.u.privacy_settings.refresh_from_db()
+
+        privacy_settings = self.u.privacy_settings
+        self.assertNotEqual(
+            privacy_settings.is_email_public,
+            old_data['is_email_public'],
+        )
+        self.assertNotEqual(
+            privacy_settings.is_username_public,
+            old_data['is_email_public'],
+        )
+        self.assertNotEqual(
+            privacy_settings.is_date_joined_public,
+            old_data['is_email_public'],
+        )
+
+        new_data = {
+            'is_email_public': privacy_settings.is_email_public,
+            'is_username_public': privacy_settings.is_username_public,
+            'is_date_joined_public': privacy_settings.is_date_joined_public,
+        }
+
+        for value in new_data.values():
+            self.assertEqual(value, True)
