@@ -217,7 +217,6 @@ class ChangePasswordFormHandlerView(View):
     http_method_names = ['post']
     def post(self, request, *args, **kwargs):
         form = UserPasswordChangeForm(request.user, request.POST)
-        print(request.POST)
         if form.is_valid():
             form.save()
             return redirect(reverse('users:login'))
