@@ -65,4 +65,10 @@ urlpatterns = [
         views.PrivacySettingsFormHandlerView.as_view(),
         name='privacy-settings-form-handler',
     ),
+
+    path(
+        'profile/changepasswordformhandler/',
+        views.ChangePasswordFormHandlerView.as_view(),
+        name='change-password-form-handler',
+    ),
 ]
