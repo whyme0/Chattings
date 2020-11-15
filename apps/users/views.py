@@ -209,4 +209,16 @@ class PrivacySettingsFormHandlerView(View):
         if form.is_valid():
             form.save()
             return HttpResponse('Form successfully saved.')
-        return HttpResponse('Invalid post data.')
+        raise SuspiciousOperation('Invalid post data.')
+
+
+@method_decorator(login_required(redirect_field_name=None), name='dispatch')
+class ChangePasswordFormHandlerView(View):
+    http_method_names = ['post']
+    def post(self, request, *args, **kwargs):
+        form = UserPasswordChangeForm(request.user, request.POST)
+        print(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('users:login'))
+        raise SuspiciousOperation('Invalid post data.')
