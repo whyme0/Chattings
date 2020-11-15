@@ -20,7 +20,7 @@ from django.db.models import Q
 from .utils import (perform_email_verification, confirm_email,
     find_user_or_404, find_user, perform_password_recovery, recover_password)
 from .forms import (UserLoginForm, UserRegistrationForm, AskEmailForm,
-    PasswordResetForm, PrivacySettingsForm)
+    PasswordResetForm, PrivacySettingsForm, UserPasswordChangeForm)
 from .models import Profile, PasswordRecovery
 
 
@@ -197,6 +197,7 @@ class ProfileEditView(TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['privacy_settings_form'] = PrivacySettingsForm(self.request.user)
+        ctx['password_change_form'] = UserPasswordChangeForm(self.request.user)
         return ctx
 
 
