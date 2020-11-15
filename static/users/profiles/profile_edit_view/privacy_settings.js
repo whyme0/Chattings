@@ -7,8 +7,8 @@ let successMessageSpan = document.querySelector(".success-message");
 
 
 submitPrivacySettingsFormButton.addEventListener("click", function(event){
-    let formtData = getPrivacySettingFormData();
-    makeAjaxRequestForPrivacySettingsForm(formtData);
+    let formData = getPrivacySettingFormData();
+    makeAjaxRequestForPrivacySettingsForm(formData);
 });
 
 
@@ -46,6 +46,4 @@ function makeAjaxRequestForPrivacySettingsForm(formData){
     };
     ajaxRequest.open("post", privacySettingsHandlerUrl, true);
     ajaxRequest.send(formData);
-    console.log("Отправлено");
-
 }
