@@ -3,7 +3,7 @@ from typing import Dict
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (AuthenticationForm, SetPasswordForm,
-                                       UserCreationForm, UsernameField)
+    UserCreationForm, UsernameField, PasswordChangeForm)
 from django.core.exceptions import ValidationError
 
 from .models import PrivacySettings, Profile
@@ -95,3 +95,15 @@ class PrivacySettingsForm(forms.ModelForm):
             field_value = v != 'Hidden'
             normalized_data[field_name] = field_value
         return normalized_data
+
+
+class UserPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['new_password1'].widget.attrs['class'] = 'field'
+        self.fields['new_password1'].help_text = ''
+        self.fields['new_password2'].widget.attrs['class'] = 'field'
+        self.fields['new_password2'].help_text = ''
+        self.fields['old_password'].widget.attrs['class'] = 'field'
+        self.fields['old_password'].help_text = ''
