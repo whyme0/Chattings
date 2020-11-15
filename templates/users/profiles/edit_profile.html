@@ -13,6 +13,10 @@
             background-color: #b3b3b3;
             border-color: #939393;
         }
+
+        input[type='checkbox']{
+            width:auto;
+        }
     </style>
 
     <link rel="stylesheet" href="{% static 'users/profiles/profile_edit_view/profile_edit.css' %}">
@@ -29,7 +33,7 @@
         <div class="col-4">
           <div class="list-group" id="list-tab" role="tablist">
             <a class="list-group-item list-group-item-action active" id="list-privacy-settings" data-toggle="list" href="#list-home" role="tab" aria-controls="home">Privacy Settings</a>
-            <a class="list-group-item list-group-item-action" id="list-password" data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">Change password</a>
+            <a class="list-group-item list-group-item-action" id="list-password-change" data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">Change password</a>
             <a class="list-group-item list-group-item-action" id="list-change-email" data-toggle="list" href="#list-messages" role="tab" aria-controls="messages">Change email</a>
           </div>
         </div>
@@ -47,11 +51,31 @@
 
 
             
-            <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-password">
-                This part of website is under development.
+            <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-password-change">
+                <form action="" method="POST">{% csrf_token %}
+                    {% for err in password_change_form.non_field_errors %}
+                        <p class="text-danger m-0 p-0 text-center non-field-error">{{ err }}</p>
+                    {% endfor %}
+                    
+                    {% for field in password_change_form %}
+                        <div class="field_wrapper">
+                            {{ field.label_tag }} <br> {{ field }}
+                            
+                            {% if field.help_text %}
+                                <p class="help">{{field.help_text|safe}}</p>
+                            {% endif %}
+        
+                            {% for err in field.errors %}
+                                <p class="text-danger field_error {{field.name}}-error m-0 p-0">{{ err }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <input value="Change password" type="submit" disabled>
+                </form>
             </div>
-            
-            
+
+
             
             <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-change-email">
                 This part of website is under development.
@@ -64,5 +88,6 @@
 
 
 {% block page_scripts %}
-    <script src="{% static 'users/profiles/profile_edit_view/profile_edit.js' %}" privacySettingsHandlerUrl="{% url 'users:privacy-settings-form-handler' %}"></script>
+    <script src="{% static 'users/profiles/profile_edit_view/privacy_settings.js' %}" privacySettingsHandlerUrl="{% url 'users:privacy-settings-form-handler' %}"></script>
+    <script src="{% static 'users/profiles/profile_edit_view/change_password.js' %}"></script>
 {% endblock page_scripts %}
