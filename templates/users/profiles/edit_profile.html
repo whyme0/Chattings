@@ -71,8 +71,8 @@
                         </div>
                     {% endfor %}
 
-                    <input value="Change password" type="submit" disabled>
                 </form>
+                <input value="Change password" type="submit" name="changePasswordBtn" disabled>
             </div>
 
 
@@ -89,5 +89,5 @@
 
 {% block page_scripts %}
     <script src="{% static 'users/profiles/profile_edit_view/privacy_settings.js' %}" privacySettingsHandlerUrl="{% url 'users:privacy-settings-form-handler' %}"></script>
-    <script src="{% static 'users/profiles/profile_edit_view/change_password.js' %}"></script>
+    <script src="{% static 'users/profiles/profile_edit_view/change_password.js' %}" type="module"></script>
 {% endblock page_scripts %}
