@@ -52,7 +52,7 @@
 
             
             <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-password-change">
-                <form action="{% url 'users:change-password-form-handler' %}" method="POST" id="changePasswordForm">{% csrf_token %}
+                <form action="?form_type=change_password_form" method="POST" id="changePasswordForm">{% csrf_token %}
                     {% for err in password_change_form.non_field_errors %}
                         <p class="text-danger m-0 p-0 text-center non-field-error">{{ err }}</p>
                     {% endfor %}
@@ -89,6 +89,5 @@
 
 {% block page_scripts %}
     <script src="{% static 'users/profiles/profile_edit_view/privacy_settings.js' %}" privacySettingsHandlerUrl="{% url 'users:privacy-settings-form-handler' %}"></script>
-    <!-- <script src="{% static 'users/profiles/profile_edit_View/ajax_change_password.js' %}" changePasswordHandlerUrl="{% url 'users:change-password-form-handler' %}"></script> -->
     <script src="{% static 'users/profiles/profile_edit_view/change_password.js' %}" type="module"></script>
 {% endblock page_scripts %}
