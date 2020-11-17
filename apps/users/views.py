@@ -1,3 +1,4 @@
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, HttpRequest
 from django.views.generic import (FormView, TemplateView, RedirectView,
     DetailView, View)
 from django.contrib.auth import login, authenticate, logout
@@ -9,7 +10,6 @@ from django.contrib.messages import error, success
 from django.contrib.auth.models import Permission
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect
-from django.http import Http404, HttpResponse
 from django.utils.html import strip_tags
 from django.utils import timezone
 from django.conf import settings
@@ -193,12 +193,36 @@ class ProfileView(DetailView):
 @method_decorator(never_cache, name='dispatch')
 class ProfileEditView(TemplateView):
     template_name = 'users/profiles/edit_profile.html'
+    change_password_form = UserPasswordChangeForm
+    privacy_settings_form = PrivacySettingsForm
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['privacy_settings_form'] = PrivacySettingsForm(self.request.user)
-        ctx['password_change_form'] = UserPasswordChangeForm(self.request.user)
+        ctx['privacy_settings_form'] = self.privacy_settings_form(self.request.user)
+        ctx['password_change_form'] = self.get_password_change_form_for_ctx()
         return ctx
+
+    def post(self, request, *args, **kwargs):
+        if request.GET.get('form_type') == 'change_password_form':
+            response = self.proceed_change_password_form(request, **kwargs)
+            return response
+        return HttpResponseBadRequest('Server cannot proceed this request')
+
+    def proceed_change_password_form(self, r: HttpRequest) -> HttpResponse:
+        form = self.change_password_form(r.user, r.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('users:login'))
+
+        return render(r, self.template_name,
+            self.get_context_data())
+    
+    def get_password_change_form_for_ctx(self):
+        if self.request.method == 'POST':
+            return self.change_password_form(
+                self.request.user,
+                self.request.POST)
+        return self.change_password_form(self.request.user)
 
 
 @method_decorator(login_required(redirect_field_name=None), name='dispatch')
@@ -209,15 +233,4 @@ class PrivacySettingsFormHandlerView(View):
         if form.is_valid():
             form.save()
             return HttpResponse('Form successfully saved.')
-        raise SuspiciousOperation('Invalid post data.')
-
-
-@method_decorator(login_required(redirect_field_name=None), name='dispatch')
-class ChangePasswordFormHandlerView(View):
-    http_method_names = ['post']
-    def post(self, request, *args, **kwargs):
-        form = UserPasswordChangeForm(request.user, request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(reverse('users:login'))
         raise SuspiciousOperation('Invalid post data.')
