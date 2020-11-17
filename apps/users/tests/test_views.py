@@ -743,6 +743,60 @@ class TestProfileEditView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.resolver_match.func.view_class, views.ProfileEditView)
         self.assertEqual(title, 'Profile Editing \ Chattings')
+    
+    def test_password_change_form_correctness(self):
+        self.client.force_login(self.u)
+        self.assertTrue(self.u.check_password('hardpwd123'))
+        response = self.client.post(
+            f'{reverse("users:edit-profile")}?form_type=change_password_form',
+            data={
+                'old_password': 'hardpwd123',
+                'new_password1': 'newhardpwd123',
+                'new_password2': 'newhardpwd123',
+            },
+            follow=True,
+        )
+        self.u.refresh_from_db()
+
+        self.assertFalse(self.u.check_password('hardpwd123'))
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.resolver_match.func.view_class, views.UserLoginView)
+    
+    # def test_password_change_form_errors(self):
+    #     self.client.force_login(self.u)
+    #     # PART 1
+    #     response = self.client.post(
+    #         f'{reverse("users:edit-profile")}?form_type=change_password_form',
+    #         data={
+    #             'old_password': 'somepwd123',
+    #             'new_password1': '123',
+    #             'new_password2': '123',
+    #         },
+    #         follow=True,
+    #     )
+
+    #     soup = BeautifulSoup(response.content, 'html.parser')
+
+    #     errors = soup.find_all('p', 'field_error')
+
+    #     self.assertEqual(errors[0].text, 'Your old password was entered incorrectly. Please enter it again.')
+    #     self.assertEqual(errors[1].text, 'This password is too short. It must contain at least 8 characters.')
+    #     self.assertEqual(errors[2].text, 'This password is too common.')
+    #     self.assertEqual(errors[3].text, 'This password is entirely numeric.')
+
+    #     # PART 2
+    #     response = self.client.post(
+    #         f'{reverse("users:edit-profile")}?form_type=change_password_form',
+    #         data={
+    #             'old_password': 'hardpwd123',
+    #             'new_password1': 'somepwd123',
+    #             'new_password2': 'somepwd321',
+    #         }
+    #     )
+    #     soup = BeautifulSoup(response.content, 'html.parser')
+    #     errors = soup.find_all('p', 'field_error')
+
+    #     self.assertEqual(errors[0].text, 'The two password fields didn’t match.')
 
 
 class TestPrivacySettingsFormHandlerView(TestCase):
