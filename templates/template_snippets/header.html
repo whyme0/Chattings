@@ -1,19 +1,81 @@
 {% load static %}
 
+<style>
+    .header__pointer{
+        background-image:  url("{% static 'images/arrow.png' %}");
+        rotate: 180deg;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        width: 20px;
+        height: 20px;
+    }
+    .header__pointer__wrapper{
+        cursor: pointer;
+        transition: opacity 0.7s;
+    }
 
-<div class="nav jusitfy-content-center border-top-0 rounded-bottom" style="background-color: #EFEFEF;">
+    .nav-link{
+        color: #808080 !important;
+        font-weight: bold;
+    }
+</style>
+
+
+<div class="nav jusitfy-content-center border-top-0 rounded-bottom border border-secondary" style="background-color: #EFEFEF;" id="headerWrapper">
     <div class="nav-item">
-        <a href="#" class="nav-link">Home</a>
+        <a href="#" class="nav-link mx-1">Chats</a>
     </div>
 
 
 
-    <div class="nav-item">
-        <a href="#" class="nav-link">Profile</a>
+    <div class="nav-item" title="Login to see this page">
+        {% if user.is_authenticated %}
+            <a href="{% url 'users:profile' user.pk %}" class="nav-link mx-1 disabled">Profile</a>
+        {% else %}
+            <a href="#" class="nav-link mx-1 disabled">Profile</a>
+        {% endif %}
     </div>
 </div>
 
 
-<div class="header__pointer m-0 p-3 jusitfy-content-end">
-    
+<div class="header__pointer__wrapper float-right mr-2 align-top border-secondary border-top-0 rounded-bottom border" style="background-color: #EFEFEF;">
+    <div class="header__pointer" id="headerPointer"></div>
 </div>
+
+
+
+<script>
+    let headerWrapper = document.getElementById("headerWrapper");
+    let headerPointer = document.getElementById("headerPointer");
+    let headerPointerWrapper = document.querySelector(".header__pointer__wrapper");
+    let isHeaderVisible = true;
+
+
+    headerPointer.addEventListener("click", function(e){
+        if (isHeaderVisible){
+            smoothHideHeader();
+            isHeaderVisible = false;
+        }
+        else{
+            smoothShowHeader();
+            isHeaderVisible = true;
+        }
+    });
+
+
+    function smoothHideHeader(){
+        headerWrapper.style.visibility = "hidden";
+        headerPointer.style.rotate = "0deg";
+        headerPointerWrapper.style.position = "relative";
+        headerPointerWrapper.style.top = `-${headerWrapper.offsetHeight}px`;
+    }
+
+
+    function smoothShowHeader(){
+        headerWrapper.style.visibility = "visible";
+        headerPointer.style.rotate = "180deg";
+        headerPointerWrapper.style.position = "static";
+    }
+
+</script>
