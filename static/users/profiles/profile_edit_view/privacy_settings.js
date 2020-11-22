@@ -33,7 +33,7 @@ function setPrivacySettingsCheckboxValues(){
 
 function makeAjaxRequestForPrivacySettingsForm(formData){
     let ajaxRequest = new XMLHttpRequest();
-    
+
     ajaxRequest.onreadystatechange = function(){
         if(ajaxRequest.readyState == XMLHttpRequest.DONE){
             if(ajaxRequest.status == 200){
