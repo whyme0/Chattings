@@ -44,6 +44,7 @@ function makeAjaxRequestForPrivacySettingsForm(formData){
             }
         }
     };
+    
     ajaxRequest.open("post", privacySettingsHandlerUrl, true);
     ajaxRequest.send(formData);
 }
