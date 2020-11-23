@@ -49,6 +49,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'apps.users',
+    'apps.chats',
 ]
 
 INSTALLED_APPS = BUILT_IN_APPS + THIRD_PARTY_APPS + LOCAL_APPS
