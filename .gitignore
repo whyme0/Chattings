@@ -5,14 +5,16 @@
 /.vscode/
 
 /media/users_avatars/**
-!/media/users_avatars/default_user_avatar.png
 
 /media/chats_avatars/**
-!/media/chats_avatars/default_chat_avatar.png
 
 *.png
-!/static/images/*.png
+
 **/migrations/
+
+!/static/images/*.png
+!/media/chats_avatars/default_chat_avatar.png
+!/media/users_avatars/default_user_avatar.png
 
 # Some trash such as cache
 **/__pycache__/
