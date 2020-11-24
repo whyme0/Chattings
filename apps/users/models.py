@@ -12,14 +12,14 @@ from .utils import generate_token
 
 
 def user_directory_upload(instance, filename):
-    return 'user_avatars/{0}'.format(instance.username)
+    return 'users_avatars/{0}'.format(instance.username)
 
 
 class Profile(AbstractUser):
     avatar_image = models.ImageField(
         upload_to=user_directory_upload,
         blank=True,
-        default='user_avatars/default_user_avatar.png',
+        default='users_avatars/default_user_avatar.png',
     )
 
     username = models.CharField(
