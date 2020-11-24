@@ -35,7 +35,8 @@
           <div class="list-group" id="list-tab" role="tablist">
             <a class="list-group-item list-group-item-action active" id="list-privacy-settings" data-toggle="list" href="#list-home" role="tab" aria-controls="home">Privacy Settings</a>
             <a class="list-group-item list-group-item-action" id="list-password-change" data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">Change password</a>
-            <a class="list-group-item list-group-item-action" id="list-change-email" data-toggle="list" href="#list-messages" role="tab" aria-controls="messages">Change email</a>
+            <a class="list-group-item list-group-item-action" id="list-change-email" data-toggle="list" href="#list-messages" role="tab" aria-controls="email">Change email</a>
+            <a class="list-group-item list-group-item-action" id="list-change-avatar" data-toggle="list" href="#list-avatar" role="tab" aria-controls="avatar">Change profile image</a>
           </div>
         </div>
         <div class="col-8 p-0">
@@ -80,6 +81,29 @@
             
             <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-change-email">
                 This part of website is under development.
+            </div>
+
+            <div class="tab-pane fade" id="list-avatar" role="tabpanel" aria-labelledby="list-change-avatar">
+                <form action="?form_type=change_profile_avatar_form" id="changeProfileAvatarForm" enctype="multipart/form-data" method="POST">{% csrf_token %}
+                    {% for err in profile_avatar_form.non_field_errors %}
+                        <p class="text-danger m-0 p-0 text-center non-field-error">{{ err }}</p>
+                    {% endfor %}
+
+                    {% for field in profile_avatar_form %}
+                        <div class="field_wrapper">
+                            {{ field.label_tag }} <br> {{ field }}
+                            
+                            {% if field.help_text %}
+                                <p class="help">{{field.help_text|safe}}</p>
+                            {% endif %}
+        
+                            {% for err in field.errors %}
+                                <p class="text-danger field_error {{field.name}}-error m-0 p-0">{{ err }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <input type="submit" value="Save" id="submitChangeProfileAvatarFormButton">
+                </form>
             </div>
           </div>
         </div>
