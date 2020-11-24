@@ -3,8 +3,13 @@
 
 # Some not which not belong to the project
 /.vscode/
-/media/user_avatars/**
-!/media/user_avatars/default_user_avatar.png
+
+/media/users_avatars/**
+!/media/users_avatars/default_user_avatar.png
+
+/media/chats_avatars/**
+!/media/chats_avatars/default_chat_avatar.png
+
 *.png
 !/static/images/*.png
 **/migrations/
