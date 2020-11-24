@@ -20,7 +20,11 @@
     <div class="d-flex jusitfy-content-start mt-4 align-items-start">
         <div class="profile__wrapper">
             <div class="profile__avatar text-center">
-                <img src="{{MEDIA_URL}}{{profile.avatar_image}}" alt="profile__avatar" width="170" class="shadow-sm bg-light">
+                {% if profile.avatar_image %}
+                    <img src="{{MEDIA_URL}}{{profile.avatar_image}}" alt="profile__avatar" width="170" class="shadow-sm bg-light">
+                {% else %}
+                    <img src="{{MEDIA_URL}}/users_avatars/default_user_avatar.png" alt="profile__avatar" width="170" class="shadow-sm bg-light">
+                {% endif %}
             </div>
             
             <div class="profile__personal mt-2 pt-2">
