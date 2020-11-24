@@ -18,6 +18,13 @@ def username_exist_validator(val):
         raise ValidationError(msg)
 
 
+def image_size_validator(img):
+    """Help to determine size of passed image
+       and forbid it, if size > 1mb"""
+    if img.file.size > 1024 * 1024:
+        raise ValidationError('This file too large.')
+
+
 class UsernameRegexValidator(RegexValidator):
     regex=r'^[\w-]+\Z'
     message=(
