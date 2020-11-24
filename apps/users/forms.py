@@ -107,3 +107,9 @@ class UserPasswordChangeForm(PasswordChangeForm):
         self.fields['new_password2'].help_text = ''
         self.fields['old_password'].widget.attrs['class'] = 'field'
         self.fields['old_password'].help_text = ''
+
+
+class ProfileAvatarForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['avatar_image']
