@@ -20,7 +20,8 @@ from django.db.models import Q
 from .utils import (perform_email_verification, confirm_email,
     find_user_or_404, find_user, perform_password_recovery, recover_password)
 from .forms import (UserLoginForm, UserRegistrationForm, AskEmailForm,
-    PasswordResetForm, PrivacySettingsForm, UserPasswordChangeForm)
+    PasswordResetForm, PrivacySettingsForm, UserPasswordChangeForm,
+    ProfileAvatarForm)
 from .models import Profile, PasswordRecovery
 
 
@@ -195,16 +196,21 @@ class ProfileEditView(TemplateView):
     template_name = 'users/profiles/edit_profile.html'
     change_password_form = UserPasswordChangeForm
     privacy_settings_form = PrivacySettingsForm
+    profile_avatar_form = ProfileAvatarForm
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['privacy_settings_form'] = self.privacy_settings_form(self.request.user)
         ctx['password_change_form'] = self.get_password_change_form_for_ctx()
+        ctx['profile_avatar_form'] = self.get_profile_avatar_form_for_ctx()
         return ctx
 
     def post(self, request, *args, **kwargs):
         if request.GET.get('form_type') == 'change_password_form':
-            response = self.proceed_change_password_form(request, **kwargs)
+            response = self.proceed_change_password_form(request)
+            return response
+        elif request.GET.get('form_type') == 'change_profile_avatar_form':
+            response = self.proceed_avatar_change_form(request)
             return response
         return HttpResponseBadRequest('Server cannot proceed this request')
 
@@ -214,8 +220,15 @@ class ProfileEditView(TemplateView):
             form.save()
             return redirect(reverse('users:login'))
 
-        return render(r, self.template_name,
-            self.get_context_data())
+        return render(r, self.template_name, self.get_context_data())
+    
+    def proceed_avatar_change_form(self, r: HttpRequest) -> HttpResponse:
+        form = self.profile_avatar_form(r.POST, r.FILES, instance=r.user)
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('users:edit-profile'))
+        
+        return render(r, self.template_name, self.get_context_data())
     
     def get_password_change_form_for_ctx(self):
         if self.request.method == 'POST':
@@ -223,6 +236,13 @@ class ProfileEditView(TemplateView):
                 self.request.user,
                 self.request.POST)
         return self.change_password_form(self.request.user)
+    
+    def get_profile_avatar_form_for_ctx(self):
+        if self.request.method == 'POST':
+            return self.profile_avatar_form(
+                self.request.POST,
+                instance=self.request.user)
+        return self.profile_avatar_form(instance=self.request.user)
 
 
 @method_decorator(login_required(redirect_field_name=None), name='dispatch')
