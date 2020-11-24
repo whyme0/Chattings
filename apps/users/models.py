@@ -5,14 +5,14 @@ from django.core.validators import EmailValidator
 from django.utils import timezone
 from django.db import models
 
-from .validators import UsernameRegexValidator 
+from .validators import UsernameRegexValidator, image_size_validator
 from .signals.signals import post_create_user
 from .managers import ProfileManager
 from .utils import generate_token
 
 
 def user_directory_upload(instance, filename):
-    return 'users_avatars/{0}'.format(instance.username)
+    return 'users_avatars/{0}/{1}'.format(instance.username, filename)
 
 
 class Profile(AbstractUser):
@@ -20,6 +20,8 @@ class Profile(AbstractUser):
         upload_to=user_directory_upload,
         blank=True,
         default='users_avatars/default_user_avatar.png',
+        help_text='Max image size 1mb.',
+        validators=[image_size_validator]
     )
 
     username = models.CharField(
