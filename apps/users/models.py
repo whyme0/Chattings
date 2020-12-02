@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.db import models
 
 from .validators import UsernameRegexValidator, image_size_validator
-from .signals.signals import post_create_user
 from .managers import ProfileManager
 from .utils import generate_token
 
