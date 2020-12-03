@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block page_title %}
+    Chats list
+{% endblock page_title %}
+
+
+
+{% block content %}
+    {% include 'template_snippets/header.html' %}
+
+    <div class="d-flex jusitfy-content-start mt-4 align-items-start">
+        
+        
+        
+        <div class="list__wrapper">
+            {% for chat in chats %}
+                <div class="chat__wrapper">
+                    {{chat.id}}
+                </div>
+            {% empty %}
+                <p>No chats found.</p>
+            {% endfor %}
+        </div>
+
+
+        
+    </div>
+{% endblock content %}
