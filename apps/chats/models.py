@@ -28,6 +28,13 @@ class Chat(models.Model):
         blank=True,
         null=True,
     )
+
+    members = ArrayField(
+        base_field=models.PositiveBigIntegerField(),
+        default=list,
+        blank=True,
+        null=True,
+    )
     
     label = models.CharField(
         max_length=70,
