@@ -25,7 +25,7 @@ $ cd Chattings
 $ pip install -r requirements.txt
 ```
 
-**Step 4**. Add file named *.env* (with content below) to project *settings* folder:
+**Step 4**. Add file named *.env* (with content like below) to project *settings* folder:
 ```
 SECRET_KEY=your_django_secret_key
 
