@@ -25,4 +25,5 @@ urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('images/favicon.ico'))),
     path('', include('apps.users.urls')),
     path('api/', include('api.api_urls')),
+    path('chats/', include('apps.chats.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
