@@ -59,6 +59,11 @@ class Chat(models.Model):
         default='chats_avatars/default_chat_avatar.png',
     )
 
+    def add_member_by_id(self, user_id):
+        """Use this method instead of direct item adding"""
+        if user_id not in self.members:
+            self.members.append(user_id)
+
     def __str__(self):
         return self.name
 
