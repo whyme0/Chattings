@@ -19,10 +19,12 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib import admin
 from django.conf import settings
+from django.urls import reverse
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('images/favicon.ico'))),
+    path('', RedirectView.as_view(url='chats/list/')),
     path('', include('apps.users.urls')),
     path('api/', include('api.api_urls')),
     path('chats/', include('apps.chats.urls'))
