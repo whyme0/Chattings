@@ -28,14 +28,14 @@ class TestChatModel(TestCase):
         )
     
     def test_success_creation(self):
-        self.assertEqual(self.chat.name, '@test_chat')
+        self.assertEqual(self.chat.get_name(), '@test_chat')
     
     def test_model_validators(self):
         with self.assertRaises(DataError):
             self.chat = Chat.objects.create(
                 owner=self.u1,
                 label='Test Chat',
-                name='a'*51,
+                name='a'*52,
             )
 
     def test_add_member_method(self):
