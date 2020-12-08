@@ -9,19 +9,30 @@
 {% block content %}
     {% include 'template_snippets/header.html' %}
 
-    <div class="d-flex jusitfy-content-start mt-4 align-items-start">
+    <div class="list__wrapper row mt-4 px-3 justify-content-center">
         
         
-        
-        <div class="list__wrapper">
+
             {% for chat in chats %}
-                <div class="chat__wrapper">
-                    {{chat.id}}
+                <div class="chat__wrapper shadow-sm p-2 col-5 m-3 border rounded">
+                    <div class="media">
+                        {% if chat.avatar %}
+                            <img src="{{MEDIA_URL}}{{chat.avatar}}" alt="chat__avatar" width="100" class="shadow-sm bg-light mr-3 rounded-circle">
+                        {% else %}
+                            <img src="{{MEDIA_URL}}/chats_avatars/default_chat_avatar.png" alt="chat__avatar" width="100" class="shadow-sm bg-light mr-3 rounded-circle">
+                        {% endif %}
+                    
+                    
+                        <div class="media-body">
+                            <h5>{{chat.label}} <span style="padding-left: 6px;color:#D8BFD8;font-size:17px;">{{chat.get_name}}</span></h5>
+                            <span style="margin-top: 5px;">{{chat.description}}</span>
+                            <span class="d-block mt-2">Members: {{chat.members|length}}</span>
+                        </div>
+                    </div>
                 </div>
             {% empty %}
                 <p>No chats found.</p>
             {% endfor %}
-        </div>
 
 
         
