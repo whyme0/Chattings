@@ -1,7 +1,5 @@
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxLengthValidator
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.db import models
 
 
@@ -64,11 +62,8 @@ class Chat(models.Model):
         if user_id not in self.members:
             self.members.append(user_id)
 
+    def get_name(self):
+        return '@'+self.name
+
     def __str__(self):
         return self.name
-
-
-@receiver(pre_save, sender=Chat)
-def pre_save_chat(sender, instance, **kwargs):
-    if '@' not in instance.name:
-        instance.name = '@' + instance.name
