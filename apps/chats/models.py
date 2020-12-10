@@ -43,12 +43,14 @@ class Chat(models.Model):
         max_length=200,
         null=True,
         blank=True,
+        help_text='Write a few words to describe your chat.'
     )
 
     name = models.SlugField(
         max_length=51,
         validators=[MaxLengthValidator(50)],
         unique=True,
+        help_text='Name must be unique and cannot be changed.'
     )
 
     avatar = models.ImageField(
