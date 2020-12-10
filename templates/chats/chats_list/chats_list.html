@@ -11,6 +11,10 @@
         .page-link{
             color: #808080 !important;
         }
+        a:hover{
+            text-decoration: none;
+            color: #000;
+        }
     </style>
 {% endblock page_head %}
 
@@ -18,6 +22,10 @@
 
 {% block content %}
     {% include 'template_snippets/header.html' %}
+
+    <div class="row mt-2 justify-content-center">
+        <a href="{% url 'chats:chat-create' %}" class="button-link w-100">Create chat</a>
+    </div>
 
     <div class="list__wrapper row mt-4 px-3 justify-content-center">
         
@@ -33,7 +41,7 @@
                         {% endif %}
                     
                     
-                        <div class="media-body">
+                        <div class="media-body" style="word-break: break-all;">
                             <h5>{{chat.label}} <span style="padding-left: 6px;color:#D8BFD8;font-size:17px;">{{chat.get_name}}</span></h5>
                             <span style="margin-top: 5px;">{{chat.description}}</span>
                             <span class="d-block mt-2">Members: {{chat.members|length}}</span>

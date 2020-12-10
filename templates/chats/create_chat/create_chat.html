@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+
+{% block page_title %}
+    Create new chat
+{% endblock page_title %}
+
+
+
+{% block content %}
+    {% include 'template_snippets/header.html' %}
+
+
+    <div class="row justify-content-center mt-3">
+        <h1>Create chat form</h1>
+    </div>
+    
+    <div class="row justify-content-center">
+        <form method="post">{% csrf_token %}
+            {% for err in form.non_field_errors %}
+                <p class="text-danger m-0 p-0 text-center non-field-error">{{ err }}</p>
+            {% endfor %}
+            <br>
+            
+            {% for field in form %}
+                <div class="field_wrapper mb-3">
+                    {{ field.label_tag }} <br> {{ field }}
+                    
+                    {% if field.help_text %}
+                        <p class="help text-secondary mb-0"><em>{{field.help_text|safe}}</em></p>
+                    {% endif %}
+
+                    {% for err in field.errors %}
+                        <p class="text-danger field_error {{field.name}}-error m-0 p-0">{{ err }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <input type="submit" value="Create">
+        </form>
+    </div>
+{% endblock content %}
