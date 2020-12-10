@@ -29,15 +29,18 @@
 
 
 
-    <div class="nav-item">
-        {% if user.is_authenticated %}
+    {% if user.is_authenticated %}
+        <div class="nav-item">
             <a href="{% url 'users:profile' user.pk %}" class="nav-link mx-1">Profile</a>
-        {% else %}
-            <div class="nav-item text-right">
-                <a href="{% url 'users:login' %}" class="nav-link mx-1" style="background-color:#fff;">Login</a>
-            </div>
-        {% endif %}
-    </div>
+        </div>
+        <div class="nav-item ml-auto">
+            <a href="{% url 'users:logout' %}" class="nav-link mx-3" style="background-color:#fff;">Logout</a>
+        </div>
+    {% else %}
+        <div class="nav-item text-right">
+            <a href="{% url 'users:login' %}" class="nav-link mx-1" style="background-color:#fff;">Login</a>
+        </div>
+    {% endif %}
 </div>
 
 
