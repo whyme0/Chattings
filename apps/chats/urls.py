@@ -9,4 +9,10 @@ urlpatterns = [
         views.ChatsList.as_view(),
         name='chat-list',
     ),
+
+    path(
+        'create/',
+        views.ChatCreateView.as_view(),
+        name='chat-create',
+    )
 ]
