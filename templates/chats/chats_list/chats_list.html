@@ -23,9 +23,12 @@
 {% block content %}
     {% include 'template_snippets/header.html' %}
 
-    <div class="row mt-2 justify-content-center">
-        <a href="{% url 'chats:chat-create' %}" class="button-link w-100">Create chat</a>
-    </div>
+    {% if user.is_authenticated %}
+        <div class="row mt-2 justify-content-center">
+            <a href="{% url 'chats:chat-create' %}" class="button-link w-100">Create chat</a>
+        </div>
+    {% endif %}
+    
 
     <div class="list__wrapper row mt-4 px-3 justify-content-center">
         
