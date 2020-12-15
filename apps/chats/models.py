@@ -8,7 +8,7 @@ from ..users.models import Profile
 
 
 def chat_avatars_directory(instance, filename):
-    return 'chats_avatars/{0}'.format(instance.name)
+    return 'chats_avatars/{0}/{1}'.format(instance.name, filename)
 
 
 class Chat(models.Model):
