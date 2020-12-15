@@ -17,7 +17,7 @@ class TestChatsListView(TestCase):
         )
 
         for i in range(1, 11):
-            chat1 = Chat.objects.create(
+            Chat.objects.create(
                 owner=cls.u1,
                 label=f'Label №{i}',
                 name=f'name_{i}',
