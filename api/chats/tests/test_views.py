@@ -63,3 +63,39 @@ class TestChatViewSet_Retrieve(APITestCase):
         self.assertIn(
             reverse('api-profile', kwargs={'pk': self.u1.pk}),
             response.data['owner'])
+
+
+class TestChatMembersView(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u1 = Profile.objects.create_user(
+            username='testuser',
+            email='testuser@mail.com',
+            password='hardpwd123',
+        )
+
+        cls.chat1 = Chat.objects.create(
+            owner=cls.u1,
+            label='Label №1',
+            name='name_1',
+        )
+
+        for i in range(1, 5):
+            Profile.objects.create_user(
+                username=f'testuser{i}',
+                email=f'testuser{i}@mail.co',
+                password='hardpwd123',
+            )
+
+    def setUp(self):
+        for profile in Profile.objects.all():
+            self.chat1.add_member_by_id(profile.id)
+            self.chat1.save()
+    
+    def test_basics(self):
+        response = self.client.get(
+            reverse('api-chat-members', kwargs={'pk': self.chat1.pk}),
+            format='json',
+        )
+
+        self.assertEqual(len(response.data['members']), 5)
