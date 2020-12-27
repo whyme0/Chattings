@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from bs4 import BeautifulSoup
 
-from ..views import ChatsList
+from ..views import ChatsList, ChatView, ChatCreateView
 from ..models import Chat
 from apps.users.models import Profile
 
@@ -65,3 +65,120 @@ class TestChatsListView(TestCase):
 
         self.assertIsNotNone(create_link)
         self.assertEqual(create_link['href'], reverse('chats:chat-create'))
+
+
+class TestChatView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u1 = Profile.objects.create_user(
+            username='testuser',
+            email='testuser@mail.com',
+            password='hardpwd123',
+        )
+
+        cls.c1 = Chat.objects.create(
+            owner=cls.u1,
+            label='Chat 1',
+            name='chat1',
+            members=[cls.u1.id],
+        )
+
+    def test_basics(self):
+        response = self.client.get(
+            reverse('chats:chat', kwargs={'pk': self.u1.pk}),
+            follow=True,
+        )
+
+        self.assertEqual(response.resolver_match.view_name, 'users:login')
+
+        self.client.force_login(self.u1)
+        response = self.client.get(
+            reverse('chats:chat', kwargs={'pk': self.c1.pk})
+        )
+
+        title = BeautifulSoup(response.content, 'html.parser').find('title').getText().strip().replace('\n', '')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, ChatView)
+        self.assertEqual(title, self.c1.label + ' \\ Chattings')
+    
+    def test_template(self):
+        self.client.force_login(self.u1)
+        response = self.client.get(
+            reverse('chats:chat', kwargs={'pk': self.c1.pk}),
+        )
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        description = soup.find('div', 'chat__modal__description')
+        chat_label = soup.find('div', 'chat__label')
+        members = soup.find('div', 'chat__modal__members')
+
+        self.assertEqual(description.get_text().replace('\n', ''), 'Description: ---')
+        self.assertEqual(members.get_text().replace('\n', ''), 'Members: 1')
+        self.assertEqual(chat_label.get_text().replace('\n', ''), self.c1.label)
+
+
+class TestChatCreateView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u1 = Profile.objects.create_user(
+            username='testuser',
+            email='testuser@mail.com',
+            password='hardpwd123',
+        )
+    
+    def test_basics(self):
+        response = self.client.get(
+            reverse('chats:chat-create'),
+            follow=True,
+        )
+
+        self.assertEqual(response.resolver_match.view_name, 'users:login')
+
+        self.client.force_login(self.u1)
+        response = self.client.get(
+            reverse('chats:chat-create')
+        )
+
+        title = BeautifulSoup(response.content, 'html.parser').find('title').getText().strip().replace('\n', '')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, ChatCreateView)
+        self.assertEqual(title, 'Create new chat \\ Chattings')
+    
+    def test_create_model(self):
+        name = 'chat-name'
+        with self.assertRaises(Chat.DoesNotExist):
+            Chat.objects.get(name=name)
+        
+        self.client.force_login(self.u1)
+        response = self.client.post(
+            reverse('chats:chat-create'),
+            data={
+                'label': 'Chat X',
+                'name': name,
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.resolver_match.func.view_class, ChatView)
+        chats = Chat.objects.filter(name=name)
+        self.assertEqual(len(chats), 1)
+    
+    def test_for_errors(self):
+        self.client.force_login(self.u1)
+        response = self.client.post(
+            reverse('chats:chat-create'),
+            data={
+                'label': '',
+                'name': 'wrong format',
+            },
+            follow=True,
+        )
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        errors = soup.findAll('p', 'field_error')
+
+        self.assertEqual(errors[0].get_text(), 'This field is required.')
+        self.assertEqual(errors[1].get_text(), 'Enter a valid “slug” consisting of letters, numbers, underscores or hyphens.')
+        
