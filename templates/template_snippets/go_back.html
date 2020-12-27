@@ -1,0 +1,11 @@
+<div class="go_back__wrapper">
+    <a href="" id="goBackLink">Go back</a>
+</div>
+
+<script>
+    let goBackLink = document.getElementById("goBackLink");
+
+    let previousAddress = document.referrer;
+
+    goBackLink.setAttribute("href", previousAddress);
+</script>
