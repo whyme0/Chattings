@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 
 {% block page_title %}
@@ -16,7 +17,7 @@
     </div>
     
     <div class="row justify-content-center">
-        <form method="post">{% csrf_token %}
+        <form method="post" id="createChatForm">{% csrf_token %}
             {% for err in form.non_field_errors %}
                 <p class="text-danger m-0 p-0 text-center non-field-error">{{ err }}</p>
             {% endfor %}
@@ -35,7 +36,12 @@
                     {% endfor %}
                 </div>
             {% endfor %}
-            <input type="submit" value="Create">
+            <input type="submit" value="Create" id="createChatButton" disabled>
         </form>
     </div>
 {% endblock content %}
+
+
+{% block page_scripts %}
+    <script src="{% static 'chats/create_chat_view/create_chat.js' %}"></script>
+{% endblock page_scripts %}

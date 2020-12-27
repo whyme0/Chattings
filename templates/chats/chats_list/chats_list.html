@@ -15,6 +15,9 @@
             text-decoration: none;
             color: #000;
         }
+        .chat__wrapper a{
+            color: #000;
+        }
     </style>
 {% endblock page_head %}
 
@@ -45,8 +48,10 @@
                     
                     
                         <div class="media-body" style="word-break: break-all;">
-                            <h5>{{chat.label}} <span style="padding-left: 6px;color:#D8BFD8;font-size:17px;">{{chat.get_name}}</span></h5>
-                            <span style="margin-top: 5px;">{{chat.description}}</span>
+                            <a href="{% url 'chats:chat' chat.pk %}"><h5>{{chat.label}} <span style="padding-left: 6px;color:#D8BFD8;font-size:17px;">{{chat.get_name}}</span></h5></a>
+                            {% if chat.description %}
+                                <span style="margin-top: 5px;">{{chat.description}}</span>
+                            {% endif %}
                             <span class="d-block mt-2">Members: {{chat.members|length}}</span>
                         </div>
                     </div>

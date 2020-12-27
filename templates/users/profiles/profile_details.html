@@ -50,12 +50,18 @@
                 <button id="profileChannelsOpenButton">Show profile channels</button>
 
                 <!-- Dropdown block with profile information -->
-                <div class="dropdown__profile-channels pl-1" style="display:none;">
-                    {% for channel in profile_channels %}
-                        <li>{{channel}}</li>
-                    {% empty %}
-                        <span>No channels yet.</span>
-                    {% endfor %}
+                <div class="dropdown__profile-channels pl-1 mt-2" style="display:none;">
+                        {% for chat in profile_chats %}
+                            <div class="media">
+                                <img src="{{MEDIA_URL}}{{chat.avatar}}" class="mr-1" width="30" height="30">
+                                <div class="media-body">
+                                    <a href="{% url 'chats:chat' chat.pk %}" class="text-dark">{{chat.get_name}}</a>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                        {% empty %}
+                            <span>No channels yet.</span>
+                        {% endfor %}
                 </div>
             </div>
         </div>
