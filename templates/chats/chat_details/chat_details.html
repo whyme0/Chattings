@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+
+
+{% block page_title %}
+    {{chat.label}}
+{% endblock page_title %}
+
+
+{% block content %}
+    {% include 'template_snippets/header.html' %}
+    {% include 'template_snippets/go_back.html' %}
+
+    <!-- <i class="bi bi-pencil-square"></i> -->
+    <div class="chat__wrapper mt-4 px-3">
+        <div class="chat__header row">
+            <div class="chat__label align-baseline">
+                <span class="h2">{{chat.label}}</span>
+            </div>
+
+
+            <div class="ml-auto chat__info">
+                <button class="btn btn-light border" data-toggle="modal" data-target="#chatInfoModal">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-info-circle" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"></path>
+                        <path d="M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588z"></path>
+                        <circle cx="8" cy="4.5" r="1"></circle>
+                      </svg>
+                </button>
+
+
+
+                <div class="modal fade" id="chatInfoModal" tabindex="-1" aria-labelledby="chatInfoModal" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h4 class="modal-title" id="exampleModalLabel">Info <span style="color:#D8BFD8;font-size: smaller;">{{chat.get_name}}</span></h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          <div class="chat__modal__description">
+                            {% if chat.description %}
+                              <h5>Description: {{chat.description}}</h5>
+                            {% else %}
+                              <h5>Description: ---</h5>
+                            {% endif %}
+                          </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="modal-body">
+                            <div class="chat__modal__members">
+                              <h5>Members: {{chat.members|length}}</h5>
+                            </div>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
