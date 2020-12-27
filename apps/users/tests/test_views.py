@@ -11,6 +11,7 @@ from django.core import mail
 from ..models import Profile, EmailVerification, PasswordRecovery
 from .. import views
 from ..utils import force_confirm_email
+from apps.chats.models import Chat
 
 
 class TestLoginView(TestCase):
@@ -697,6 +698,19 @@ class TestProfileView(TestCase):
             password='hardpwd123',
         )
 
+        cls.c1 = Chat.objects.create(
+            owner=cls.u,
+            label='Chat 1',
+            name='chat1',
+            members=[cls.u.id]
+        )
+        cls.c2 = Chat.objects.create(
+            owner=cls.u,
+            label='Chat 2',
+            name='chat2',
+            members=[cls.u.id]
+        )
+
     def test_fundamental_view_properties(self):
         """Testing title, templates, status code, etc."""
         response = self.client.get(
@@ -707,6 +721,21 @@ class TestProfileView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.resolver_match.func.view_class, views.ProfileView)
         self.assertEqual(title, 'Profile №%d \\ Chattings' % self.u.id)
+    
+    def test_profile_template(self):
+        """Test template of ProfileView"""
+        response = self.client.get(
+            reverse('users:profile', kwargs={'pk': self.u.pk})
+        )
+
+        soup = BeautifulSoup(response.content, features='html.parser')
+        chats = soup.select('.media-body a')
+
+        self.assertEqual(len(chats), 2)
+        self.assertEqual(chats[0].get_text(), self.c1.get_name())
+        self.assertEqual(chats[0]['href'], reverse('chats:chat', kwargs={'pk': self.c1.pk}))
+        self.assertEqual(chats[1].get_text(), self.c2.get_name())
+        self.assertEqual(chats[1]['href'], reverse('chats:chat', kwargs={'pk': self.c2.pk}))
 
 
 class TestProfileEditView(TestCase):
@@ -807,7 +836,7 @@ class TestPrivacySettingsFormHandlerView(TestCase):
             email='temp1@mail.co',
             password='hardpwd123',
         )
-    
+
     def setUp(self):
         content_type = ContentType.objects.get_for_model(Profile)
         can_login_perm = Permission.objects.create(
