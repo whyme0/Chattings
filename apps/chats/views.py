@@ -30,13 +30,11 @@ class ChatCreateView(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('chats:chat-list')
+        return reverse('chats:chat', kwargs={'pk': self.object.pk})
 
 
 @method_decorator(login_required(redirect_field_name=None), name='dispatch')
 class ChatView(DetailView):
     model = Chat
-
-    def get(self, request, *args, **kwargs):
-        super().get(request, *args, **kwargs)
-        return HttpResponse('This part of site is under development.')
+    context_object_name = 'chat'
+    template_name = 'chats/chat_details/chat_details.html'
