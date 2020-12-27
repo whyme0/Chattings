@@ -187,6 +187,7 @@ class ProfileView(DetailView):
         profile = self.get_object()
         ctx = super().get_context_data(*args, **kwargs)
         ctx['profile_info'] = profile.privacy_settings.get_public_info().items()
+        ctx['profile_chats'] = profile.get_active_chats()
         return ctx
 
 
