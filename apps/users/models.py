@@ -56,6 +56,11 @@ class Profile(AbstractUser):
             return False
         except EmailVerification.DoesNotExist:
             return True
+    
+    def get_active_chats(self):
+        """Return queryset of chats with specific Profile"""
+        from ..chats.models import Chat
+        return Chat.objects.filter(members__contains=[self.id])
 
 
 class Token(models.Model):
