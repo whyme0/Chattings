@@ -1,10 +1,12 @@
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
+from django.views.generic.detail import SingleObjectMixin
 from django.views.generic import ListView, DetailView
 from django.views.decorators.cache import never_cache
 from django.utils.decorators import method_decorator
+from django.views.generic.base import RedirectView
 from django.views.generic.edit import CreateView
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from .models import Chat
@@ -22,8 +24,8 @@ class ChatsList(ListView):
 @method_decorator(never_cache, name='dispatch')
 class ChatCreateView(CreateView):
     model = Chat
-    template_name = 'chats/create_chat/create_chat.html'
     fields = ['label', 'description', 'name', 'avatar']
+    template_name = 'chats/create_chat/create_chat.html'
 
     def form_valid(self, form):
         form.instance.owner = self.request.user
@@ -38,3 +40,23 @@ class ChatView(DetailView):
     model = Chat
     context_object_name = 'chat'
     template_name = 'chats/chat_details/chat_details.html'
+
+
+@method_decorator(login_required(redirect_field_name=None), name='dispatch')
+class DeleteChatView(RedirectView, SingleObjectMixin):
+    queryset = Chat.objects.all()
+    template_name = 'chats/chat_delete/chat_delete.html'
+
+    def get(self, request, *args, **kwargs):
+        super().get(request, *args, **kwargs)
+        chat = self.get_object()
+        self.chat_owner = chat.owner
+
+        if request.user == self.chat_owner:
+            chat.delete()
+            return redirect(self.get_redirect_url())
+        else:
+            return HttpResponseBadRequest('No way.')
+
+    def get_redirect_url(self):
+        return reverse('users:profile', kwargs={'pk': self.chat_owner()})
