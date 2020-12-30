@@ -45,18 +45,18 @@ class ChatView(DetailView):
 @method_decorator(login_required(redirect_field_name=None), name='dispatch')
 class DeleteChatView(RedirectView, SingleObjectMixin):
     queryset = Chat.objects.all()
+    http_method_names = ['get']
     template_name = 'chats/chat_delete/chat_delete.html'
 
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
         chat = self.get_object()
-        self.chat_owner = chat.owner
 
-        if request.user == self.chat_owner:
+        if request.user == chat.owner:
             chat.delete()
             return redirect(self.get_redirect_url())
         else:
             return HttpResponseBadRequest('No way.')
 
-    def get_redirect_url(self):
-        return reverse('users:profile', kwargs={'pk': self.chat_owner()})
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse('chats:chat-create')
