@@ -21,4 +21,10 @@ urlpatterns = [
         views.ChatView.as_view(),
         name='chat',
     ),
+
+    path(
+        '<int:pk>/delete',
+        views.DeleteChatView.as_view(),
+        name='chat-delete',
+    ),
 ]
