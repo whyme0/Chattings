@@ -181,4 +181,56 @@ class TestChatCreateView(TestCase):
 
         self.assertEqual(errors[0].get_text(), 'This field is required.')
         self.assertEqual(errors[1].get_text(), 'Enter a valid “slug” consisting of letters, numbers, underscores or hyphens.')
-        
+
+
+class TestDeleteChatView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u1 = Profile.objects.create_user(
+            username='testuser1',
+            email='testmail1@mail.co',
+            password='hardpwd123',
+        )
+        cls.u2 = Profile.objects.create_user(
+            username='testuser2',
+            email='testmail2@mail.co',
+            password='hardpwd123',
+        )
+
+        cls.c1 = Chat.objects.create(
+            label='Chat1',
+            name='chat1',
+            owner=cls.u1,
+        )
+
+    def test_for_404(self):
+        self.client.force_login(self.u1)
+        response = self.client.get(
+            reverse('chats:chat-delete', kwargs={'pk': '1000'}),
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 404)
+    
+    def test_for_400(self):
+        self.client.force_login(self.u2)
+        response = self.client.get(
+            reverse('chats:chat-delete', kwargs={'pk': self.c1.pk}),
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content.decode('utf-8'), 'No way.')
+    
+    def test_for_delete(self):
+        self.assertEqual(Chat.objects.all().count(), 1)
+
+        self.client.force_login(self.u1)
+        response = self.client.get(
+            reverse('chats:chat-delete', kwargs={'pk': self.c1.pk}),
+            follow=True,
+        )
+
+        self.assertEqual(Chat.objects.all().count(), 0)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, ChatCreateView)
