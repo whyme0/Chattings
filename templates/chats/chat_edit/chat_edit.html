@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block page_title %}
+    Edit {{chat.get_name}}
+{% endblock page_title %}
+
+
+{% block page_head %}
+    <style>
+        input[type='checkbox']{
+            width: auto;
+        }
+    </style>
+{% endblock page_head %}
+
+
+
+{% block content %}
+    {% include 'template_snippets/header.html' %}
+    {% include 'template_snippets/go_back.html' %}
+
+
+    <div class="row justify-content-center mt-3">
+        <h1>Edit {{chat.get_name}} chat</h1>
+    </div>
+    
+    <div class="row justify-content-center">
+        <form method="post" id="editChatForm" enctype="multipart/form-data">{% csrf_token %}
+            {% for err in form.non_field_errors %}
+                <p class="text-danger m-0 p-0 text-center non-field-error">{{ err }}</p>
+            {% endfor %}
+            <br>
+            
+            {% for field in form %}
+                <div class="field_wrapper mb-3">
+                    {{ field.label_tag }} <br> {{ field }}
+                    
+                    {% if field.help_text %}
+                        <p class="help text-secondary mb-0"><em>{{field.help_text|safe}}</em></p>
+                    {% endif %}
+
+                    {% for err in field.errors %}
+                        <p class="text-danger field_error {{field.name}}-error m-0 p-0">{{ err }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <input type="submit" value="Update" id="editChatButton">
+        </form>
+    </div>
+{% endblock content %}
+
+
+{% block page_scripts %}
+    <script src="{% static 'chats/edit_chat_view/edit_chat.js' %}"></script>
+{% endblock page_scripts %}
