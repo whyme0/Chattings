@@ -3,6 +3,7 @@ from django.core.validators import MaxLengthValidator
 from django.db import models
 
 
+from ..users.validators import image_size_validator
 from .validators import validate_empty_string
 from ..users.models import Profile
 
@@ -57,6 +58,7 @@ class Chat(models.Model):
         upload_to=chat_avatars_directory,
         blank=True,
         default='chats_avatars/default_chat_avatar.png',
+        validators=[image_size_validator],
     )
 
     def add_member_by_id(self, user_id):
