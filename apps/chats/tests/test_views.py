@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from bs4 import BeautifulSoup
 
-from ..views import ChatsList, ChatView, ChatCreateView
+from ..views import ChatsList, ChatView, ChatCreateView, EditChatView
 from ..models import Chat
 from apps.users.models import Profile
 
@@ -234,3 +234,92 @@ class TestDeleteChatView(TestCase):
         self.assertEqual(Chat.objects.all().count(), 0)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.resolver_match.func.view_class, ChatCreateView)
+
+
+class TestEditChatView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u1 = Profile.objects.create_user(
+            username='testuser1',
+            email='testmail1@mail.co',
+            password='hardpwd123',
+        )
+        cls.u2 = Profile.objects.create_user(
+            username='testuser2',
+            email='testmail2@mail.co',
+            password='hardpwd123',
+        )
+
+        cls.c1 = Chat.objects.create(
+            owner=cls.u1,
+            label='Chat1',
+            name='chat1',
+        )
+    
+    def test_basics(self):
+        self.client.force_login(self.u1)
+        response = self.client.get(
+            reverse('chats:chat-edit', kwargs={'pk': self.u1.pk}),
+            follow=True,
+        )
+
+        title = BeautifulSoup(response.content, 'html.parser').find('title').getText().strip().replace('\n', '')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.resolver_match.func.view_class, EditChatView)
+        self.assertEqual(title, 'Edit %s \\ Chattings' % self.c1.get_name())
+
+
+    def test_for_404(self):
+        self.client.force_login(self.u1)
+        response = self.client.get(
+            reverse('chats:chat-edit', kwargs={'pk': '1000'}),
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 404)
+    
+    def test_for_400(self):
+        self.client.force_login(self.u2)
+        response = self.client.get(
+            reverse('chats:chat-edit', kwargs={'pk': self.c1.pk}),
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content.decode('utf-8'), 'No way.')
+    
+    def test_fields_errors(self):
+        self.client.force_login(self.u1)
+        response = self.client.post(
+            reverse('chats:chat-edit', kwargs={'pk': self.c1.pk}),
+            data={
+                'label': '',
+            },
+            follow=True,
+        )
+
+        errors = BeautifulSoup(response.content, 'html.parser').findAll('p', 'field_error')
+
+        self.assertEqual(errors[0].getText(), 'This field is required.')
+    
+    def test_for_update(self):
+        old_label = self.c1.label
+        old_description = self.c1.description
+        self.assertEqual(old_label, 'Chat1')
+        self.assertIsNone(old_description)
+
+        self.client.force_login(self.u1)
+        response = self.client.post(
+            reverse('chats:chat-edit', kwargs={'pk': self.c1.pk}),
+            data={
+                'label': 'Updated label',
+                'description': 'Updated description',
+            },
+            follow=True,
+        )
+        self.c1.refresh_from_db()
+
+        self.assertNotEqual(old_label, self.c1.label)
+        self.assertNotEqual(old_description, self.c1.description)
+        self.assertEqual(self.c1.label, 'Updated label')
+        self.assertEqual(self.c1.description, 'Updated description')
