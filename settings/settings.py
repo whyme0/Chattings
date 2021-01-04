@@ -45,6 +45,7 @@ BUILT_IN_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'rest_framework.authtoken',
     'django_extensions',
 ]
 
@@ -176,4 +177,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer', # use only json representation
     ],
     'DATETIME_FORMAT': '%d.%m.%Y %H:%M:%S',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
 }
