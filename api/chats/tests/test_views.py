@@ -6,7 +6,7 @@ from ..views import ChatViewSet
 from apps.users.models import Profile
 from apps.chats.models import Chat
 
-class TestChatViewSet_List(APITestCase):
+class TestChatViewSet__List(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.u1 = Profile.objects.create_user(
@@ -32,7 +32,45 @@ class TestChatViewSet_List(APITestCase):
         self.assertEqual(len(response.data), 10)
 
 
-class TestChatViewSet_Retrieve(APITestCase):
+class TestChatViewSet__Create(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.u1 = Profile.objects.create_user(
+            username='testuser',
+            email='testuser@mail.com',
+            password='hardpwd123',
+        )
+    
+    def test_for_create(self):
+        self.assertEqual(Chat.objects.filter(name='name1').count(), 0)
+        self.client.force_login(self.u1)
+        response = self.client.post(
+            reverse('api-chat-list'),
+            data={
+                'label': 'Chat1',
+                'name': 'name1',
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Chat.objects.filter(name='name1').count(), 1)
+        self.assertEqual(Chat.objects.get(name='name1').owner, self.u1)
+    
+    def test_for_errors(self):
+        self.client.force_login(self.u1)
+        response = self.client.post(
+            reverse('api-chat-list'),
+            format='json',
+            follow=True,
+        )
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['label'][0], 'This field is required.')
+        self.assertEqual(response.data['name'][0], 'This field is required.')
+
+
+class TestChatViewSet__Retrieve(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.u1 = Profile.objects.create_user(
@@ -48,6 +86,7 @@ class TestChatViewSet_Retrieve(APITestCase):
         )
     
     def test_basics(self):
+        self.client.force_login(self.u1)
         response = self.client.get(
             reverse('api-chat-details', kwargs={'pk': self.chat1.pk}),
             format='json',
@@ -99,3 +138,12 @@ class TestChatMembersView(APITestCase):
         )
 
         self.assertEqual(len(response.data['members']), 5)
+
+
+class TestChatViewSet__Partial_Update(APITestCase):
+    pass
+
+
+class TestChatViewSet__Destroy(APITestCase):
+    pass
+
