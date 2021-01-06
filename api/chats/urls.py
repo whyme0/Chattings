@@ -2,8 +2,15 @@ from django.urls import path
 
 from .views import ChatViewSet, ChatMembersView
 
-chats_list = ChatViewSet.as_view({'get':'list'})
-chat_details = ChatViewSet.as_view({'get':'retrieve'})
+chats_list = ChatViewSet.as_view({
+    'get': 'list',
+    'post': 'create',
+})
+chat_details = ChatViewSet.as_view({
+    'get': 'retrieve',
+    'patch': 'partial_update',
+    'delete': 'destroy',
+})
 
 urlpatterns = [
     path(
