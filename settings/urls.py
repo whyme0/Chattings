@@ -27,5 +27,5 @@ urlpatterns = [
     path('', RedirectView.as_view(url='chats/list/')),
     path('', include('apps.users.urls')),
     path('api/', include('api.api_urls')),
-    path('chats/', include('apps.chats.urls'))
+    path('chats/', include('apps.chats.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
