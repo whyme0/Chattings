@@ -259,7 +259,7 @@ class TestEditChatView(TestCase):
     def test_basics(self):
         self.client.force_login(self.u1)
         response = self.client.get(
-            reverse('chats:chat-edit', kwargs={'pk': self.u1.pk}),
+            reverse('chats:chat-edit', kwargs={'pk': self.c1.pk}),
             follow=True,
         )
 
