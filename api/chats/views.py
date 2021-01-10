@@ -1,6 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import viewsets
 
 from .permissions import IsOwnerOrAuthenticatedOrReadOnly
@@ -15,11 +16,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-
-
-class ChatMembersView(RetrieveAPIView):
-    queryset = Chat.objects.all()
-
-    def retrieve(self, request, *args, **kwargs):
-        chat = self.get_object()
-        return Response({'members': chat.members})
+    
+    @action(methods=['get'], detail=False)
+    def members(self, request, *args, **kwargs):
+        return Response({'members': self.get_object().members})
