@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import ChatViewSet, ChatMembersView
+from .views import ChatViewSet
 
 chats_list = ChatViewSet.as_view({
     'get': 'list',
@@ -10,6 +10,9 @@ chat_details = ChatViewSet.as_view({
     'get': 'retrieve',
     'patch': 'partial_update',
     'delete': 'destroy',
+})
+chat_members = ChatViewSet.as_view({
+    'get': 'members',
 })
 
 urlpatterns = [
@@ -27,7 +30,7 @@ urlpatterns = [
 
     path(
         'chats/<int:pk>/members',
-        ChatMembersView.as_view(),
+        chat_members,
         name='api-chat-members',
     ),
 ]
