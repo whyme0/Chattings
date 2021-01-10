@@ -139,6 +139,7 @@ class TestChatMembersView(APITestCase):
             self.chat1.save()
     
     def test_basics(self):
+        self.client.force_login(self.u1)
         response = self.client.get(
             reverse('api-chat-members', kwargs={'pk': self.chat1.pk}),
             format='json',
